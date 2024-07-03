@@ -1,0 +1,28 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+default_language_version:
+  python: python3.11
+default_install_hook_types: [pre-commit, post-checkout, post-merge]
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-added-large-files
+        exclude: ^templates/
+      - id: check-toml
+        exclude: ^templates/
+      - id: check-yaml
+        args:
+          - --unsafe
+        exclude: ^templates/
+      - id: end-of-file-fixer
+        exclude: ^templates/
+      - id: trailing-whitespace
+        exclude: ^templates/
+ci:
+  autofix_commit_msg: 🎨 [pre-commit.ci] Auto format from pre-commit.com hooks
+  autofix_prs: true
+  autoupdate_schedule: weekly
+  autoupdate_commit_msg: ⬆ [pre-commit.ci] pre-commit autoupdate
+  skip: []
+  submodules: false
