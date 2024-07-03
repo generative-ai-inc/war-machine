@@ -1,0 +1,22 @@
+[package]
+name = "wm"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.79.0"
+
+[dependencies]
+clap = { version = "4.5.8", features = ["derive", "cargo"] }
+regex = "1.7.0"
+dotenv = "0.15.0"
+reqwest = { version = "0.12.5", features = ["json"], default-features = false }
+tokio = { version = "1.24.0", features = [
+  "macros",
+  "signal",
+  "fs",
+  "process",
+  "rt-multi-thread",
+  "io-util",
+] }
+lazy_static = "1.5.0"
+futures = "0.3"
+os_info = "3.8.2"

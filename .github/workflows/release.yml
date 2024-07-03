@@ -1,0 +1,72 @@
+name: Release
+
+permissions:
+  contents: write
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  release:
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: true
+      matrix:
+        platform: [macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Rust setup
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install dependencies (macOS only)
+        if: matrix.platform == 'macos-latest'
+        run: |
+          rustup target add aarch64-apple-darwin
+          rustup target add x86_64-apple-darwin
+
+      - name: Install dependencies (Linux only)
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          rustup target add x86_64-unknown-linux-gnu
+
+      - name: Build (Linux)
+        if: matrix.platform == 'ubuntu-latest'
+        run: cargo build --release --target x86_64-unknown-linux-gnu
+
+      - name: Build for ARM (macOS)
+        if: matrix.platform == 'macos-latest'
+        run: cargo build --release --target x86_64-apple-darwin
+
+      - name: Build for Intel (macOS)
+        if: matrix.platform == 'macos-latest'
+        run: cargo build --release --target aarch64-apple-darwin
+
+      - name: Copy binary (macOS)
+        if: matrix.platform == 'macos-latest'
+        run: |
+          cp target/release/aarch64-apple-darwin/wm target/release/wm-aarch64-darwin
+          cp target/release/x86_64-apple-darwin/wm target/release/wm-x86_64-darwin
+
+      - name: Copy binary (Linux)
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          cp target/release/x86_64-unknown-linux-gnu/wm target/release/wm-x86_64-linux
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          draft: true
+          files: |
+            target/release/wm-aarch64-darwin
+            target/release/wm-x86_64-darwin
+            target/release/wm-x86_64-linux
