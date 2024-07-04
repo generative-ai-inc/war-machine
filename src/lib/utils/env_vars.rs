@@ -1,8 +1,10 @@
 use std::env;
 
+use regex::Regex;
+
 use crate::lib::utils::logging;
 
-pub async fn set_env_vars(env_vars: Vec<(String, String, String)>) {
+pub async fn set(env_vars: Vec<(String, String, String)>) {
     dotenv::dotenv().ok();
 
     logging::nl().await;
@@ -48,4 +50,14 @@ pub async fn set_env_vars(env_vars: Vec<(String, String, String)>) {
         "└───────────────────────────┴──────────────────────┘",
     )
     .await;
+}
+
+pub async fn verify_name(name: String) {
+    let regex = Regex::new(r"^[a-zA-Z0-9_]+$").unwrap();
+    regex.is_match(&name);
+
+    if !regex.is_match(&name) {
+        println!("Invalid variable name: {}", name);
+        std::process::exit(1);
+    }
 }

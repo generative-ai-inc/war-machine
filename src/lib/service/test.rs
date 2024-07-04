@@ -2,6 +2,8 @@ use crate::lib::utils::logging::{self};
 use std::path::PathBuf;
 use tokio::process::Command;
 
+use super::prepare;
+
 pub async fn test(
     workers: i32,
     path: Option<PathBuf>,
@@ -9,7 +11,12 @@ pub async fn test(
     with_coverage: bool,
     verbose: bool,
     save_coverage: bool,
+    no_local_instances: bool,
+    clean_mode: bool,
+    no_bitwarden: bool,
 ) {
+    prepare(true, no_local_instances, clean_mode, no_bitwarden).await;
+
     let mut main_command = format!("poetry run pytest -n {} --dist=loadfile", workers,);
 
     if let Some(path) = path {

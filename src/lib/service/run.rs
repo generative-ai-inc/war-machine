@@ -2,7 +2,19 @@ use crate::lib::utils::logging::{self};
 use std::path::PathBuf;
 use tokio::process::Command;
 
-pub async fn run(dev_mode: bool, bind_address: String, workers: i32, config_file: PathBuf) {
+use super::prepare;
+
+pub async fn run(
+    dev_mode: bool,
+    bind_address: String,
+    workers: i32,
+    config_file: PathBuf,
+    no_local_instances: bool,
+    no_bitwarden: bool,
+    clean_mode: bool,
+) {
+    prepare(dev_mode, no_local_instances, clean_mode, no_bitwarden).await;
+
     let mut main_command = format!(
         "poetry run hypercorn app.main:app --bind {} --workers {} --config {}",
         bind_address,
