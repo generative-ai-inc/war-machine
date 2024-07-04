@@ -1,2 +1,2 @@
-pub mod credentials;
 pub mod generic;
+pub mod keyring;

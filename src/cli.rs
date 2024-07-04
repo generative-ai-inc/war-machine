@@ -11,7 +11,6 @@ pub fn build() -> Command {
 
     command!()
     .about("🔥🔫 War Machine is a tool for managing and installing services, tools, and libraries.")
-    .subcommand_required(true)
     .subcommand(Command::new("update")
         .about("Update War Machine")
     )
@@ -136,6 +135,12 @@ pub fn build() -> Command {
             .arg_required_else_help(true)
             .arg(
                 arg!([name] "Name of the token")
+                .required(false)
+                .value_parser(value_parser!(String))
+                .value_hint(ValueHint::Other),
+            )
+            .arg(
+                arg!([value] "Value of the token")
                 .required(false)
                 .value_parser(value_parser!(String))
                 .value_hint(ValueHint::Other),

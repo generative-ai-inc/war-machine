@@ -5,13 +5,11 @@ War Machine is a tool for managing and installing services, tools, and libraries
 ## Installation
 
 1. On Github, create a personal access token with the `repo` scope. This is necessary to download our services from the private repos. You can create it at [https://github.com/settings/tokens](https://github.com/settings/tokens).
-2. Use your github token to install War Machine:
+2. Run the installation script. It will ask you to enter your github token.
 
    ```sh
-   curl -sS https://gixuqotpkdlrfbermgnf.supabase.co/storage/v1/object/public/dev/install.sh | sudo GITHUB_TOKEN=<your-github-token> bash
+   curl -sS https://gixuqotpkdlrfbermgnf.supabase.co/storage/v1/object/public/dev/install.sh | sudo bash
    ```
-
-   Make sure to replace `<your-github-token>` with your actual github token.
 
 3. Add your bitwarden secret manager token to War Machine with the following command:
 

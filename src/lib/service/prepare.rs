@@ -1,6 +1,6 @@
 use crate::lib::{
     local_instances::start::start_all_instances,
-    system::{self, python_path},
+    system::{self, poetry::install_deps, python_path},
     utils::{bitwarden, env_vars::set, logging},
 };
 
@@ -15,6 +15,7 @@ pub async fn prepare(
     no_bitwarden: bool,
 ) {
     python_path::check().await;
+    install_deps(dev_mode).await;
 
     let mut env_vars: Vec<(String, String, String)> = Vec::new();
     if dev_mode {

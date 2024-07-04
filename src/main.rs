@@ -2,7 +2,7 @@ use clap::Command;
 use clap_complete::{generate, Generator, Shell};
 use dotenv::dotenv;
 use lazy_static::lazy_static;
-use lib::auth::{credentials, generic};
+use lib::auth::{generic, keyring};
 use serde_json::{json, Value};
 use std::io;
 use std::path::PathBuf;
@@ -68,7 +68,7 @@ async fn main() {
     let token_mode = matches.subcommand_matches("token").is_some();
 
     if start_mode || test_mode || update_mode {
-        credentials::check().await;
+        keyring::check().await;
     }
 
     if start_mode {
@@ -187,30 +187,38 @@ async fn main() {
                 if let Some(name) = add_matches.get_one::<String>("name") {
                     let upper_name = name.to_uppercase();
                     env_vars::verify_name(upper_name.clone()).await;
-                    let mut credentials = credentials::get_credentials().await;
-                    let token = generic::ask_for_token(&upper_name).await;
+
+                    let mut credentials = keyring::get_credentials().await;
+                    let token;
+                    if let Some(value) = add_matches.get_one::<String>("value") {
+                        token = value.to_owned();
+                    } else {
+                        token = generic::ask_for_token(&upper_name).await;
+                    }
                     credentials[upper_name] = json!(token);
-                    credentials::set_credentials(credentials).await;
+                    keyring::set_credentials(credentials).await;
                 }
             } else if let Some(remove_matches) = token_matches.subcommand_matches("remove") {
                 if remove_matches.get_flag("all") {
                     let credentials = json!({});
-                    credentials::set_credentials(credentials).await;
+                    keyring::set_credentials(credentials).await;
                 } else if let Some(name) = remove_matches.get_one::<String>("name") {
                     let upper_name = name.to_uppercase();
                     env_vars::verify_name(upper_name.clone()).await;
-                    let mut credentials = credentials::get_credentials().await;
+                    let mut credentials = keyring::get_credentials().await;
                     if let Value::Object(ref mut map) = credentials {
                         map.remove(&upper_name);
                     }
-                    credentials::set_credentials(credentials).await;
+                    keyring::set_credentials(credentials).await;
                 }
             } else if token_matches.subcommand_matches("list").is_some() {
-                let credentials = credentials::get_credentials().await;
+                let credentials = keyring::get_credentials().await;
                 for (key, _) in credentials.as_object().unwrap() {
                     println!("{}", key);
                 }
             }
         }
+    } else {
+        cli::build().print_help().unwrap();
     }
 }
