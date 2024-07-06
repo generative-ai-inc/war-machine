@@ -10,7 +10,7 @@ registry_credentials = [
   dev   = "poetry run hypercorn app.main:app --bind 127.0.0.1:8000 --config hypercorn.toml --reload"
   test  = "poetry run pytest --dist=loadfile"
 
-[pre-commands]
+[pre_commands]
   start = "poetry install"
   dev   = "poetry install --with dev"
   test  = "poetry install --with dev"

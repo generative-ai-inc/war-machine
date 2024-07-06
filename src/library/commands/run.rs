@@ -1,7 +1,7 @@
 use tokio::process::Command;
 
 use crate::{
-    library::utils::logging,
+    library::{system::command, utils::logging},
     models::{config::Config, machine_state::MachineState},
 };
 
@@ -19,6 +19,22 @@ pub async fn run(
     prepare(&machine_state, &config, &secrets, no_services, clean_mode).await;
 
     if let Some(command_name) = command_name {
+        let pre_command_result = config.pre_commands.get(&command_name);
+        if let Some(pre_command) = pre_command_result {
+            let result = command::run(pre_command).await;
+            match result {
+                Ok(output) => {
+                    logging::info(&format!("Output: {}", output)).await;
+                    logging::info("✅ Pre command completed successfully").await;
+                }
+                Err(e) => {
+                    logging::error(e.to_string().as_str().trim()).await;
+                    logging::error("🛑 Failed to run pre command").await;
+                    std::process::exit(1);
+                }
+            }
+        }
+
         let command = config.commands.get(&command_name).unwrap();
         let command = format!("{} {}", command, command_args);
         logging::nl().await;
