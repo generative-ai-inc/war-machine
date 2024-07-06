@@ -8,7 +8,7 @@ War Machine is a tool for managing and installing services, tools, and libraries
 2. Run the installation script. It will ask you to enter your github token.
 
    ```sh
-   curl -sS https://gixuqotpkdlrfbermgnf.supabase.co/storage/v1/object/public/dev/install.sh | sudo bash
+   bash <(curl -sS https://gixuqotpkdlrfbermgnf.supabase.co/storage/v1/object/public/dev/install.sh)
    ```
 
 3. Add your github username to War Machine with the following command:

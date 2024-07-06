@@ -8,15 +8,8 @@ abort() {
 echo "Installing War Machine to /usr/local/bin"
 
 GITHUB_TOKEN=""
-while [ "$GITHUB_TOKEN" == "" ]; do
-  read -sp "Enter your GITHUB_TOKEN:" GITHUB_TOKEN
-  echo
-done
-
-# Must be run with sudo
-if [ "$(id -u)" -ne 0 ]; then
-  abort "This script must be run with sudo"
-fi
+read -sp "Enter your GITHUB_TOKEN:" GITHUB_TOKEN
+echo
 
 WM_DIR="/usr/local/bin"
 WM_PATH="${WM_DIR}/war-machine"
@@ -41,15 +34,15 @@ if [ -z "$ASSET_URL" ]; then
 fi
 
 # Add accepts header to the request
-curl -H "Authorization: bearer ${GITHUB_TOKEN}" -H "Accept: application/octet-stream" -fsSL "${ASSET_URL}" -o "${WM_PATH}"
+sudo curl -H "Authorization: bearer ${GITHUB_TOKEN}" -H "Accept: application/octet-stream" -fsSL "${ASSET_URL}" -o "${WM_PATH}"
 
 # Symlink the war-machine command to war
-ln -sf "${WM_PATH}" "${WM_DIR}/war"
+sudo ln -sf "${WM_PATH}" "${WM_DIR}/war"
 
 # Symlink the war-machine command to wm
-ln -sf "${WM_PATH}" "${WM_DIR}/wm"
+sudo ln -sf "${WM_PATH}" "${WM_DIR}/wm"
 
-chmod +x "${WM_PATH}"
+sudo chmod +x "${WM_PATH}"
 echo "🔫 War Machine installed. Run 'war-machine' to get started."
 
 ${WM_PATH} secret add GITHUB_TOKEN ${GITHUB_TOKEN}
