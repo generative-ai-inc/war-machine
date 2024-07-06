@@ -1,28 +1,18 @@
 use std::error::Error;
 use tokio::{process::Command, sync::watch};
 
-use crate::lib::utils::logging;
+use crate::library::utils::logging;
 
 async fn install() -> Result<(), Box<dyn Error>> {
     let (tx, mut rx) = watch::channel(false);
 
-    let download_result = Command::new("curl")
-        .arg("-fsSL")
-        .arg("https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh")
-        .output()
-        .await;
-    let script = match download_result {
-        Ok(output) => String::from_utf8_lossy(&output.stdout.to_owned()).to_string(),
-        Err(e) => return Err(e.into()),
-    };
-
-    let child = Command::new("bash")
-        .arg("-c")
-        .arg(&script)
+    let child = Command::new("pipx")
+        .arg("install")
+        .arg("poetry")
         .spawn()
-        .expect("Failed to install brew");
+        .expect("Failed to install poetry");
 
-    let pid: u32 = child.id().expect("Failed to get brew install pid");
+    let pid: u32 = child.id().expect("Failed to get poetry install pid");
     let handle = child.wait_with_output();
 
     let install_handle = tokio::spawn(async move {
@@ -60,33 +50,33 @@ async fn install() -> Result<(), Box<dyn Error>> {
             if output.status.success() {
                 tx.send(true).unwrap();
                 install_handle.await.unwrap();
-                logging::info("🍺 Brew has been installed.").await;
+                logging::info("📝 Poetry has been installed.").await;
                 Ok(())
             } else {
-                Err(Box::from("🛑 Brew installation failed"))
+                Err(Box::from("🛑 Poetry installation failed"))
             }
         }
         Err(e) => Err(Box::from(format!(
-            "🛑 Failed to get brew installation status: {}",
+            "🛑 Failed to get poetry install status: {}",
             e
         ))),
     }
 }
 
 pub async fn check_installation() {
-    let brew_version_result = Command::new("brew").arg("--version").output().await;
+    let poetry_version_result = Command::new("poetry").arg("--version").output().await;
 
-    match brew_version_result {
+    match poetry_version_result {
         Ok(output) => {
             logging::info(&format!(
-                "Brew version: {}",
+                "Poetry version: {}",
                 String::from_utf8_lossy(&output.stdout).trim()
             ))
             .await;
             return;
         }
         Err(_) => {
-            logging::warn("Brew is not installed, installing...").await;
+            logging::warn("Poetry is not installed, installing...").await;
             let install_result = install().await;
 
             match install_result {

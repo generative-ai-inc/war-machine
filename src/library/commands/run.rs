@@ -1,6 +1,6 @@
 use tokio::process::Command;
 
-use crate::{lib::utils::logging, models::config::Config};
+use crate::{library::utils::logging, models::config::Config};
 
 use super::prepare;
 

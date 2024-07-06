@@ -2,7 +2,7 @@ use std::error::Error;
 
 use tokio::{process::Command, sync::watch};
 
-use crate::lib::utils::logging;
+use crate::library::utils::logging;
 
 pub async fn run(command_str: &str) -> Result<String, Box<dyn Error>> {
     let run_results = Command::new("sh").arg("-c").arg(command_str).output().await;

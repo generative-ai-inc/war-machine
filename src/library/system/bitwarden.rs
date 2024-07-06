@@ -1,4 +1,4 @@
-use crate::lib::utils::logging;
+use crate::library::utils::logging;
 use os_info;
 use std::os::unix::fs::PermissionsExt;
 use tokio::fs;

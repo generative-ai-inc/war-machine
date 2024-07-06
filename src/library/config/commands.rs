@@ -1,4 +1,4 @@
-use crate::{lib::utils::logging, models::config::Config};
+use crate::{library::utils::logging, models::config::Config};
 
 /// Check that the command is in the configuration
 pub async fn check(config: &Config, command: &String) {

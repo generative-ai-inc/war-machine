@@ -2,7 +2,7 @@ use futures::future::join_all;
 use std::error::Error;
 use tokio::{process::Command, sync::watch};
 
-use crate::{lib::utils::logging, models::config::ContainerSource};
+use crate::{library::utils::logging, models::config::ContainerSource};
 
 use super::command;
 

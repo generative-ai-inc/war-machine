@@ -1,6 +1,6 @@
 use futures::future::join_all;
 
-use crate::lib::system::{custom_app, docker};
+use crate::library::system::{custom_app, docker};
 use crate::models::config::{Config, Service, Source};
 
 pub async fn start(service: &Service, clean_mode: bool, fail_fast: bool) {

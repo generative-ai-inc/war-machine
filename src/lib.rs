@@ -1,14 +1,6 @@
-pub mod lib {
-    pub mod commands;
-    pub mod config;
-    pub mod secrets;
-    pub mod system;
-    pub mod utils;
-}
+pub mod library;
 
-pub mod models {
-    pub mod config;
-}
+pub mod models;
 
 pub mod built_info {
     // The file has been placed there by the build script.

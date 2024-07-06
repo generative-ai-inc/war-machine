@@ -2,7 +2,7 @@ use std::{env, path::PathBuf};
 
 use tokio::{fs::OpenOptions, io::AsyncWriteExt};
 
-use crate::lib::utils::logging;
+use crate::library::utils::logging;
 
 /// Checks that the PYTHONPATH is set, if not it will add it to the .env file
 pub async fn check(env_file_path: &PathBuf, pythonpath_value: &PathBuf) {

@@ -43,4 +43,4 @@ bws*
 target
 meili_data
 supabase
-./war_machine.toml
+.warmachine

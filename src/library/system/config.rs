@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use tokio::fs::{self};
 
-use crate::{lib::utils::logging, models::config::Config};
+use crate::{library::utils::logging, models::config::Config};
 
 /// Checks that the config file is set up correctly
 pub async fn parse(config_path: PathBuf) -> Config {

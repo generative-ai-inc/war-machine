@@ -1,7 +1,7 @@
 use std::{collections::HashMap, env, path::PathBuf};
 
 use crate::{
-    lib::{
+    library::{
         config::services,
         system::{command, docker, pythonpath},
         utils::{bitwarden, env_vars, logging},

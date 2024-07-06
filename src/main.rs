@@ -4,11 +4,11 @@ use lazy_static::lazy_static;
 use serde_json::{json, Value};
 use std::io;
 use std::path::PathBuf;
-use war_machine::lib::commands::run;
-use war_machine::lib::config::{commands, features, requirements};
-use war_machine::lib::secrets::{generic, keyring};
-use war_machine::lib::system::config;
-use war_machine::lib::utils::{env_vars, logging, updater};
+use war_machine::library::commands::run;
+use war_machine::library::config::{commands, features, requirements};
+use war_machine::library::secrets::{generic, keyring};
+use war_machine::library::system::config;
+use war_machine::library::utils::{env_vars, logging, updater};
 
 mod cli;
 
@@ -75,6 +75,12 @@ async fn main() {
         }
 
         let config = config::parse(config_path).await;
+
+        // Lets create the .warmachine folder in the current dir if it doesn't exist
+        let warmachine_dir = std::env::current_dir().unwrap().join(".warmachine");
+        if !warmachine_dir.exists() {
+            std::fs::create_dir_all(warmachine_dir).unwrap();
+        }
 
         // Check that the command is in the config
         if let Some(ref asserted_command) = command_name {

@@ -1,4 +1,4 @@
-use crate::lib::utils::logging;
+use crate::library::utils::logging;
 use keyring::Entry;
 use serde_json::json;
 

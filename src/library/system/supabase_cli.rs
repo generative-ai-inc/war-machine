@@ -1,7 +1,7 @@
 use std::error::Error;
 use tokio::{process::Command, sync::watch};
 
-use crate::lib::utils::logging;
+use crate::library::utils::logging;
 
 async fn install() -> Result<(), Box<dyn Error>> {
     let (tx, mut rx) = watch::channel(false);

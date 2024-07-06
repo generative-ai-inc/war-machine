@@ -1,18 +1,20 @@
 use std::error::Error;
 use tokio::{process::Command, sync::watch};
 
-use crate::lib::utils::logging;
+use crate::library::utils::logging;
+
+use super::poetry;
 
 async fn install() -> Result<(), Box<dyn Error>> {
     let (tx, mut rx) = watch::channel(false);
 
-    let child = Command::new("pipx")
+    let child = Command::new("brew")
         .arg("install")
-        .arg("poetry")
+        .arg("pipx")
         .spawn()
-        .expect("Failed to install poetry");
+        .expect("Failed to install pipx");
 
-    let pid: u32 = child.id().expect("Failed to get poetry install pid");
+    let pid: u32 = child.id().expect("Failed to get pipx install pid");
     let handle = child.wait_with_output();
 
     let install_handle = tokio::spawn(async move {
@@ -50,33 +52,38 @@ async fn install() -> Result<(), Box<dyn Error>> {
             if output.status.success() {
                 tx.send(true).unwrap();
                 install_handle.await.unwrap();
-                logging::info("📝 Poetry has been installed.").await;
+
+                Command::new("pipx").arg("ensurepath").output().await?;
+
+                logging::info("❎ pipx has been installed.").await;
+
+                poetry::check_installation().await;
                 Ok(())
             } else {
-                Err(Box::from("🛑 Poetry installation failed"))
+                Err(Box::from("🛑 pipx installation failed"))
             }
         }
         Err(e) => Err(Box::from(format!(
-            "🛑 Failed to get poetry install status: {}",
+            "🛑 Failed to get pipx install status: {}",
             e
         ))),
     }
 }
 
 pub async fn check_installation() {
-    let poetry_version_result = Command::new("poetry").arg("--version").output().await;
+    let pipx_version_result = Command::new("pipx").arg("--version").output().await;
 
-    match poetry_version_result {
+    match pipx_version_result {
         Ok(output) => {
             logging::info(&format!(
-                "Poetry version: {}",
+                "pipx version: {}",
                 String::from_utf8_lossy(&output.stdout).trim()
             ))
             .await;
             return;
         }
         Err(_) => {
-            logging::warn("Poetry is not installed, installing...").await;
+            logging::warn("pipx is not installed, installing...").await;
             let install_result = install().await;
 
             match install_result {

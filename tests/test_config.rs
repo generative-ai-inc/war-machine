@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use war_machine::lib::system::config;
+use war_machine::library::system::config;
 
 #[tokio::test]
 async fn test_parse_config() {

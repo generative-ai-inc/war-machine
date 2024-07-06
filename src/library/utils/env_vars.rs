@@ -2,7 +2,7 @@ use std::{collections::HashMap, env};
 
 use regex::Regex;
 
-use crate::lib::{secrets, utils::logging};
+use crate::library::{secrets, utils::logging};
 
 pub async fn print_variables_box(
     original_env_vars: HashMap<String, String>,

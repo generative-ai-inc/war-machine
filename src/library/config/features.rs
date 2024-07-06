@@ -1,5 +1,5 @@
 use crate::{
-    lib::{system::bitwarden, utils::env_vars},
+    library::{system::bitwarden, utils::env_vars},
     models::config::{Config, Feature},
 };
 

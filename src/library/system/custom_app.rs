@@ -1,4 +1,4 @@
-use crate::{lib::utils::logging, models::config::AppSource};
+use crate::{library::utils::logging, models::config::AppSource};
 
 use super::command;
 

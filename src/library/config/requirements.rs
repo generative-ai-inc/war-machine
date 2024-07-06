@@ -1,5 +1,5 @@
 use crate::{
-    lib::system::{brew, docker, pipx, poetry, python},
+    library::system::{brew, docker, pipx, poetry, python},
     models::config::{Config, Requirement},
 };
 
