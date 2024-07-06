@@ -73,7 +73,7 @@ async fn install() -> Result<(), Box<dyn Error>> {
     }
 }
 
-pub async fn check() {
+pub async fn check_installation() {
     let brew_version_result = Command::new("brew").arg("--version").output().await;
 
     match brew_version_result {

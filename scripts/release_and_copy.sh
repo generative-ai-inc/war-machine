@@ -5,4 +5,4 @@
 
 cargo build --release
 
-cp target/release/wm ~/bin/wm
+sudo cp target/release/war /usr/local/bin/war-machine

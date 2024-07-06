@@ -1,34 +1,22 @@
 use clap::Command;
 use clap_complete::{generate, Generator, Shell};
-use dotenv::dotenv;
 use lazy_static::lazy_static;
-use lib::auth::{generic, keyring};
 use serde_json::{json, Value};
 use std::io;
 use std::path::PathBuf;
+use war_machine::lib::commands::run;
+use war_machine::lib::config::{commands, features, requirements};
+use war_machine::lib::secrets::{generic, keyring};
+use war_machine::lib::system::config;
+use war_machine::lib::utils::{env_vars, logging, updater};
 
 mod cli;
-mod lib {
-    pub mod auth;
-    pub mod local_instances;
-    pub mod service;
-    pub mod system;
-    pub mod utils;
-}
-
-pub mod built_info {
-    // The file has been placed there by the build script.
-    include!(concat!(env!("OUT_DIR"), "/built.rs"));
-}
-
-use lib::service::{run, test};
-use lib::utils::{env_vars, logging, updater};
 
 // Use lazy_static to avoid leaking string in an uncontrolled way
 lazy_static! {
     pub static ref WORKERS_STRING: String = 1.to_string();
     pub static ref WORKERS_STR: &'static str = Box::leak(WORKERS_STRING.clone().into_boxed_str());
-    pub static ref CONFIG_PATH: PathBuf = PathBuf::from("hypercorn.toml");
+    pub static ref CONFIG_PATH: PathBuf = PathBuf::from("war_machine.toml");
     pub static ref CONFIG_PATH_STR: &'static str =
         Box::leak(CONFIG_PATH.to_str().unwrap().to_string().into_boxed_str());
     pub static ref BIND_ADDRESS: String = "127.0.0.1:8000".to_string();
@@ -42,133 +30,69 @@ fn print_completions<G: Generator>(gen: G, cmd: &mut Command) {
 
 #[tokio::main]
 async fn main() {
-    dotenv().ok();
-
     // Run options
-    let mut dev_mode = false;
     let mut clean_mode = false;
-    let mut no_local_instances = false;
-    let mut no_bitwarden = false;
-    let mut workers = WORKERS_STR.parse::<i32>().unwrap();
-    let mut config_file = CONFIG_PATH.clone();
-    let mut bind_address = BIND_ADDRESS.clone();
+    let mut no_services = false;
+    let mut config_path = CONFIG_PATH.clone();
 
-    // Test options
-    let mut path = None;
-    let mut with_coverage = false;
-    let mut ignore = None;
-    let mut verbose = false;
-    let mut save_coverage = false;
     let matches = cli::build().get_matches();
 
-    let start_mode = matches.subcommand_matches("start").is_some();
-    let test_mode = matches.subcommand_matches("test").is_some();
+    let run_mode = matches.subcommand_matches("run").is_some();
     let update_mode = matches.subcommand_matches("update").is_some();
     let completions_mode = matches.subcommand_matches("completions").is_some();
-    let token_mode = matches.subcommand_matches("token").is_some();
+    let secrets_mode = matches.subcommand_matches("secret").is_some();
 
-    if start_mode || test_mode || update_mode {
-        keyring::check().await;
-    }
+    let mut command_args = "".to_string();
 
-    if start_mode {
-        if matches.get_flag("dev") {
-            logging::info("Running in development mode").await;
-            dev_mode = true;
-        }
-
-        if let Some(passed_bind_address) = matches.get_one::<String>("bind") {
-            logging::info(&format!("Binding to: {}", passed_bind_address)).await;
-            bind_address = passed_bind_address.to_owned();
-        }
-
-        if let Some(passed_workers) = matches.get_one::<i32>("workers") {
-            logging::info(&format!("Workers: {}", passed_workers)).await;
-            workers = passed_workers.to_owned();
-        }
-
-        if let Some(passed_config_file) = matches.get_one::<PathBuf>("config") {
-            logging::info(&format!("Config file: {}", passed_config_file.display())).await;
-            config_file = passed_config_file.to_owned();
-        }
-
-        if matches.get_flag("no-local-instances") {
-            logging::warn("Local tool instances disabled").await;
-            no_local_instances = true;
-        }
-
-        if matches.get_flag("no-bitwarden") {
-            logging::warn("Bitwarden environment variables disabled").await;
-            no_bitwarden = true;
-        }
-
-        if matches.get_flag("clean") {
-            logging::warn("Cleaning the docker environment before starting the server").await;
-            clean_mode = true;
-        }
-
-        run(
-            dev_mode,
-            bind_address,
-            workers,
-            config_file,
-            no_local_instances,
-            no_bitwarden,
-            clean_mode,
-        )
-        .await;
-    } else if test_mode {
-        // You can check for the existence of subcommands, and if found use their
-        // matches just as you would the top level cmd
-        if let Some(matches) = matches.subcommand_matches("test") {
-            if let Some(passed_path) = matches.get_one::<PathBuf>("path") {
-                logging::info(&format!(
-                    "Running tests for path: {}",
-                    passed_path.display()
-                ))
-                .await;
-                path = Some(passed_path.to_owned());
+    if run_mode {
+        let mut command_name = None;
+        if let Some(run_matches) = matches.subcommand_matches("run") {
+            if let Some(passed_command_name) = run_matches.get_one::<String>("command") {
+                command_name = Some(passed_command_name.to_owned());
+                logging::info(&format!("Command: {}", passed_command_name)).await;
             }
-            if matches.get_flag("coverage") {
-                logging::info("Running tests with coverage").await;
-                with_coverage = true;
+
+            if let Some(passed_config_path) = run_matches.get_one::<PathBuf>("config") {
+                logging::info(&format!("Config file: {}", passed_config_path.display())).await;
+                config_path = passed_config_path.to_owned();
             }
-            if let Some(passed_ignore) = matches.get_one::<PathBuf>("ignore") {
-                logging::info(&format!("Ignoring: {}", passed_ignore.display())).await;
-                ignore = Some(passed_ignore.to_owned());
+
+            if run_matches.get_flag("no-services") {
+                logging::warn("Running without services").await;
+                no_services = true;
             }
-            if matches.get_flag("verbose") {
-                logging::info("Verbose output").await;
-                verbose = true;
-            }
-            if matches.get_flag("save-coverage") {
-                logging::info("Saving coverage report").await;
-                save_coverage = true;
-            }
-            if matches.get_flag("no-local-instances") {
-                logging::warn("Local tool instances disabled").await;
-                no_local_instances = true;
-            }
-            if matches.get_flag("no-bitwarden") {
-                logging::warn("Bitwarden environment variables disabled").await;
-                no_bitwarden = true;
-            }
-            if matches.get_flag("clean") {
-                logging::warn("Cleaning the docker environment before running the tests").await;
+
+            if run_matches.get_flag("clean") {
+                logging::warn("Cleaning the docker environment before starting the server").await;
                 clean_mode = true;
             }
+
+            if let Some(passed_command_args) = run_matches.get_many::<String>("command_args") {
+                for arg in passed_command_args {
+                    command_args = command_args + &arg + " ";
+                }
+            }
         }
 
-        test(
-            workers,
-            path,
-            ignore,
-            with_coverage,
-            verbose,
-            save_coverage,
-            no_local_instances,
+        let config = config::parse(config_path).await;
+
+        // Check that the command is in the config
+        if let Some(ref asserted_command) = command_name {
+            commands::check(&config, &asserted_command).await;
+        }
+
+        let secrets = keyring::get_secrets().await;
+
+        features::check(&config, &secrets).await;
+        requirements::check(&config).await;
+
+        run(
+            config,
+            secrets,
+            command_name,
+            no_services,
             clean_mode,
-            no_bitwarden,
+            command_args,
         )
         .await;
     } else if update_mode {
@@ -181,38 +105,38 @@ async fn main() {
                 print_completions(shell, &mut cmd);
             }
         }
-    } else if token_mode {
-        if let Some(token_matches) = matches.subcommand_matches("token") {
-            if let Some(add_matches) = token_matches.subcommand_matches("add") {
+    } else if secrets_mode {
+        if let Some(secrets_matches) = matches.subcommand_matches("secret") {
+            if let Some(add_matches) = secrets_matches.subcommand_matches("add") {
                 if let Some(name) = add_matches.get_one::<String>("name") {
                     let upper_name = name.to_uppercase();
                     env_vars::verify_name(upper_name.clone()).await;
 
-                    let mut credentials = keyring::get_credentials().await;
-                    let token;
+                    let mut secrets = keyring::get_secrets().await;
+                    let secret;
                     if let Some(value) = add_matches.get_one::<String>("value") {
-                        token = value.to_owned();
+                        secret = value.to_owned();
                     } else {
-                        token = generic::ask_for_token(&upper_name).await;
+                        secret = generic::ask_for_secret(&upper_name).await;
                     }
-                    credentials[upper_name] = json!(token);
-                    keyring::set_credentials(credentials).await;
+                    secrets[upper_name] = json!(secret);
+                    keyring::set_secret(secrets).await;
                 }
-            } else if let Some(remove_matches) = token_matches.subcommand_matches("remove") {
+            } else if let Some(remove_matches) = secrets_matches.subcommand_matches("remove") {
                 if remove_matches.get_flag("all") {
-                    let credentials = json!({});
-                    keyring::set_credentials(credentials).await;
+                    let secrets = json!({});
+                    keyring::set_secret(secrets).await;
                 } else if let Some(name) = remove_matches.get_one::<String>("name") {
                     let upper_name = name.to_uppercase();
                     env_vars::verify_name(upper_name.clone()).await;
-                    let mut credentials = keyring::get_credentials().await;
-                    if let Value::Object(ref mut map) = credentials {
+                    let mut secrets = keyring::get_secrets().await;
+                    if let Value::Object(ref mut map) = secrets {
                         map.remove(&upper_name);
                     }
-                    keyring::set_credentials(credentials).await;
+                    keyring::set_secret(secrets).await;
                 }
-            } else if token_matches.subcommand_matches("list").is_some() {
-                let credentials = keyring::get_credentials().await;
+            } else if secrets_matches.subcommand_matches("list").is_some() {
+                let credentials = keyring::get_secrets().await;
                 for (key, _) in credentials.as_object().unwrap() {
                     println!("{}", key);
                 }

@@ -1,5 +1,5 @@
 [package]
-  name         = "wm"
+  name         = "war_machine"
   version      = "0.1.0"
   edition      = "2021"
   rust-version = "1.79.0"
@@ -33,3 +33,4 @@
     "rt-multi-thread",
     "io-util",
   ] }
+  toml = "0.8.14"

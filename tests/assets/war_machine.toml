@@ -1,0 +1,109 @@
+machine_name = "war"
+machine_description = "A war machine"
+requirements = ["brew", "docker", "pipx", "poetry"]
+registry_credentials = [
+  { registry = "ghcr.io", username = "GITHUB_USERNAME", password = "GITHUB_TOKEN" },
+]
+
+[commands]
+  start = "poetry run hypercorn app.main:app --bind 127.0.0.1:8000 --config hypercorn.toml"
+  dev   = "poetry run hypercorn app.main:app --bind 127.0.0.1:8000 --config hypercorn.toml --reload"
+  test  = "poetry run pytest --dist=loadfile"
+
+[pre-commands]
+  start = "poetry install"
+  dev   = "poetry install --with dev"
+  test  = "poetry install --with dev"
+
+[[features]]
+  name             = "pythonpath"
+  env_file_path    = ".env"
+  pythonpath_value = "./app"
+
+[[features]]
+  name = "bitwarden"
+
+[[services]]
+  name = "redis"
+  exposed_values = [
+    { name = "REDIS_URL", value = "localhost" },
+    { name = "REDIS_PORT", value = "6379" },
+    { name = "REDIS_PASSWORD", value = "" },
+  ]
+
+  [services.source]
+    image    = "redis"
+    tag      = "latest"
+    registry = "docker.io"
+
+    start_command = """
+      docker run -d --name ${service.name} -p 6379:6379 \
+      --health-cmd="redis-cli ping" \
+      --health-interval=10s \
+      --health-timeout=5s \
+      --health-retries=3 \
+      --health-start-period=10s \
+      ${service.source.image}:${service.source.tag} --notify-keyspace-events Ex
+      """
+
+[[services]]
+  name = "qdrant"
+  exposed_values = [
+    { name = "QDRANT_API_URL", value = "localhost" },
+    { name = "QDRANT_API_PORT", value = "6333" },
+    { name = "QDRANT_API_KEY", value = "" },
+  ]
+
+  [services.source]
+    image         = "qdrant/qdrant"
+    tag           = "latest"
+    registry      = "docker.io"
+    start_command = "docker run -d --name ${service.name} -p 6333:6333 ${service.source.image}:${service.source.tag}"
+
+
+[[services]]
+  name = "meili"
+  exposed_values = [
+    { name = "MEILISEARCH_URL", value = "http://localhost:7700" },
+    { name = "MEILISEARCH_KEY", value = "a_UTF-8_string_of_at_least_16_bytes" },
+  ]
+
+  [services.source]
+    image    = "getmeili/meilisearch"
+    tag      = "latest"
+    registry = "docker.io"
+
+    start_command = """docker run -d --name ${service.name} -p 7700:7700 \
+    -v $(pwd)/meili_data:/meili_data \
+    -e MEILI_MASTER_KEY=$MEILISEARCH_KEY \
+    ${service.source.image}:${service.source.tag}
+    """
+
+[[services]]
+  name = "supabase"
+
+  [services.source]
+    install_command       = "brew install supabase/supabase/supabase"
+    health_check_command  = "supabase --version"
+    version_check_command = "supabase --version"
+    start_command         = "supabase start"
+
+  [[services.exposed_values]]
+    command = "supabase status -o env"
+    available_before_start = false
+    exclude = [
+      "DB_URL",
+      "GRAPHQL_URL",
+      "INBUCKET_URL",
+      "S3_PROTOCOL_ACCESS_KEY_SECRET",
+      "S3_PROTOCOL_ACCESS_KEY_ID",
+      "S3_PROTOCOL_REGION",
+      "STORAGE_S3_URL",
+      "STUDIO_URL",
+    ]
+
+    [services.exposed_values.rename]
+      "ANON_KEY"         = "SUPABASE_ANON_KEY"
+      "API_URL"          = "SUPABASE_URL"
+      "JWT_SECRET"       = "SUPABASE_JWT_SECRET"
+      "SERVICE_ROLE_KEY" = "SUPABASE_SERVICE_ROLE_KEY"

@@ -1,6 +1,9 @@
 pub mod auth;
 pub mod bitwarden;
+pub mod config;
+pub mod env_vars;
 pub mod local_instances;
 pub mod service;
 pub mod system;
+pub mod updater;
 pub mod utils;

@@ -57,7 +57,7 @@ async fn install() -> Result<(), Box<dyn Error>> {
 
                 logging::info("❎ pipx has been installed.").await;
 
-                poetry::check().await;
+                poetry::check_installation().await;
                 Ok(())
             } else {
                 Err(Box::from("🛑 pipx installation failed"))
@@ -70,7 +70,7 @@ async fn install() -> Result<(), Box<dyn Error>> {
     }
 }
 
-pub async fn check() {
+pub async fn check_installation() {
     let pipx_version_result = Command::new("pipx").arg("--version").output().await;
 
     match pipx_version_result {

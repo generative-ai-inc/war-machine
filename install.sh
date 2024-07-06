@@ -19,14 +19,14 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 WM_DIR="/usr/local/bin"
-WM_PATH="${WM_DIR}/wm"
+WM_PATH="${WM_DIR}/war-machine"
 
 OS="$(/usr/bin/uname -s)"
 ARCH="$(/usr/bin/uname -m)"
 
 # Make os lowercase
 OS="$(echo ${OS} | tr '[:upper:]' '[:lower:]')"
-ASSET_NAME="wm-${ARCH}-${OS}"
+ASSET_NAME="war-machine-${ARCH}-${OS}"
 
 # Get the latest release information
 RELEASE_INFO=$(curl -H "Authorization: bearer ${GITHUB_TOKEN}" -fsSL https://api.github.com/repos/generative-ai-inc/war-machine/releases/latest)
@@ -43,8 +43,13 @@ fi
 # Add accepts header to the request
 curl -H "Authorization: bearer ${GITHUB_TOKEN}" -H "Accept: application/octet-stream" -fsSL "${ASSET_URL}" -o "${WM_PATH}"
 
+# Symlink the war-machine command to war
+ln -sf "${WM_PATH}" "${WM_DIR}/war"
+
+# Symlink the war-machine command to wm
+ln -sf "${WM_PATH}" "${WM_DIR}/wm"
+
 chmod +x "${WM_PATH}"
+echo "🔫 War Machine installed. Run 'war-machine' to get started."
 
-echo "🔫 War Machine installed. Run 'wm' to get started."
-
-${WM_PATH} token add GITHUB_TOKEN ${GITHUB_TOKEN}
+${WM_PATH} secret add GITHUB_TOKEN ${GITHUB_TOKEN}

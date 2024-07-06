@@ -4,40 +4,19 @@ use clap_complete::Shell;
 use dotenv::dotenv;
 use std::path::PathBuf;
 
-use crate::{BIND_ADDRESS_STR, CONFIG_PATH_STR, WORKERS_STR};
+use crate::CONFIG_PATH_STR;
 
 pub fn build() -> Command {
     dotenv().ok();
 
     command!()
     .about("🔥🔫 War Machine is a tool for managing and installing services, tools, and libraries.")
-    .subcommand(Command::new("update")
-        .about("Update War Machine")
-    )
-    .subcommand(Command::new("start") // requires `cargo` feature
-        .about("Starts the server. Use --dev to enable development mode")
+    .subcommand(Command::new("run")
+        .about("Run a command")
         .arg(
-            arg!(
-                -d --dev ... "Enable development mode. This will start local instances by default.\nIt will also enable reloading the server on file changes."
-            )
+            arg!([command] "Command to run")
             .required(false)
-            .action(ArgAction::SetTrue)
-        )
-        .arg(
-            arg!(
-                -b --bind <STR> "Bind to the specified address."
-            )
-            .default_value(*BIND_ADDRESS_STR)
-            .required(false)
-            .value_parser(value_parser!(String)),
-        )
-        .arg(
-            arg!(
-                -w --workers <INT> "Number of workers to use."
-            )
-            .default_value(*WORKERS_STR)
-            .required(false)
-            .value_parser(value_parser!(i32)),
+            .value_parser(value_parser!(String))
         )
         .arg(
             arg!(
@@ -50,97 +29,44 @@ pub fn build() -> Command {
         )
         .arg(
             arg!(
-                --"no-local-instances" ... "Disable starting local tool instances like Redis, Supabase, Qdrant, etc."
+                --"no-services" "Does not start the services defined in the configuration file"
             )
             .required(false)
             .action(ArgAction::SetTrue),
         )
         .arg(
             arg!(
-                --"no-bitwarden" ... "Disable fetching Bitwarden environment variables"
+                --clean "Clean the docker environment before starting the server"
             )
             .required(false)
             .action(ArgAction::SetTrue),
         )
+        // Allow passing direct args to the command
         .arg(
             arg!(
-                --clean ... "Clean the docker environment before starting the server"
+                [command_args] ... "Arguments passed after --"
             )
             .required(false)
-            .action(ArgAction::SetTrue),
+            .value_parser(value_parser!(String))
+            .value_hint(ValueHint::Other)
+            .allow_hyphen_values(true)
+            .last(true)
         )
-    ).subcommand(
-        Command::new("test")
-            .about("Run the tests")
-            .arg(
-                arg!([path] "Path to the test file or directory")
-                .required(false)
-                .value_parser(value_parser!(PathBuf))
-                .value_hint(ValueHint::AnyPath),
-            )
-            .arg(
-                arg!(-c --coverage ... "Run the tests with coverage")
-                .action(ArgAction::SetTrue)
-            ).arg(
-                arg!(-i --ignore <PATH> "Ignore the specified tests")
-                .required(false)
-                .value_parser(value_parser!(PathBuf))
-                .value_hint(ValueHint::AnyPath),
-            )
-            .arg(
-                arg!(-v --verbose ... "Verbose output")
-                .action(ArgAction::SetTrue)
-            )
-            .arg(
-                arg!(
-                    -w --workers <INT> "Number of test workers to use"
-                )
-                .default_value(*WORKERS_STR)
-                .required(false)
-                .value_parser(value_parser!(i32)),
-            )
-            .arg(
-                arg!(
-                    --"save-coverage" ... "Save the coverage report"
-                )
-                .action(ArgAction::SetTrue)
-            )
-            .arg(
-                arg!(
-                    --"no-local-instances" ... "Disable starting local tool instances like Redis, Supabase, Qdrant, etc."
-                )
-                .required(false)
-                .action(ArgAction::SetTrue),
-            )
-            .arg(
-                arg!(
-                    --"no-bitwarden" ... "Disable fetching Bitwarden environment variables"
-                )
-                .required(false)
-                .action(ArgAction::SetTrue),
-            )
-            .arg(
-                arg!(
-                    --clean ... "Clean the docker environment before starting the server"
-                )
-                .required(false)
-                .action(ArgAction::SetTrue),
-            )
     )
-    .subcommand(Command::new("token")
-        .about("Add or remove an access token")
+    .subcommand(Command::new("secret")
+        .about("Add or remove a secret")
         .subcommand_required(true)
         .subcommand(Command::new("add")
-            .about("Add an access token")
+            .about("Add a secret")
             .arg_required_else_help(true)
             .arg(
-                arg!([name] "Name of the token")
+                arg!([name] "Name of the secret")
                 .required(false)
                 .value_parser(value_parser!(String))
                 .value_hint(ValueHint::Other),
             )
             .arg(
-                arg!([value] "Value of the token")
+                arg!([value] "Value of the secret")
                 .required(false)
                 .value_parser(value_parser!(String))
                 .value_hint(ValueHint::Other),
@@ -148,21 +74,24 @@ pub fn build() -> Command {
         )
         .subcommand(Command::new("remove")
             .arg_required_else_help(true)
-            .about("Remove an access token")
+            .about("Remove a secret")
             .arg(
-                arg!([name] "Name of the token")
+                arg!([name] "Name of the secret")
                 .required(false)
                 .value_parser(value_parser!(String))
                 .value_hint(ValueHint::Other),
             )
             .arg(
-                arg!(-a --all ... "Remove all tokens")
+                arg!(-a --all "Remove all secrets")
                 .action(ArgAction::SetTrue)
             )
         )
         .subcommand(Command::new("list")
-            .about("List your access tokens")
+            .about("List your secrets")
         )
+    )
+    .subcommand(Command::new("update")
+        .about("Update War Machine")
     )
     .subcommand(Command::new("completions")
         .about("Generate shell completions. Place the output in your shell's completions directory")

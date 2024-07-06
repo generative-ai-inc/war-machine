@@ -1,9 +1,11 @@
+pub mod bitwarden;
 pub mod brew;
-pub mod docker_cli;
+pub mod command;
+pub mod config;
+pub mod custom_app;
+pub mod docker;
 pub mod pipx;
 pub mod poetry;
-pub mod python_path;
+pub mod python;
+pub mod pythonpath;
 pub mod supabase_cli;
-pub mod system;
-
-pub use system::check;
