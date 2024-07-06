@@ -31,7 +31,6 @@ pub struct ContainerSource {
 pub struct AppSource {
     pub install_command: String,
     pub health_check_command: String,
-    pub version_check_command: Option<String>,
     pub start_command: String,
     pub stop_command: Option<String>,
     pub clean_command: Option<String>,

@@ -24,15 +24,15 @@ pub const BOLD_WHITE: &str = "\x1b[1;37m";
 pub const BOLD_NC: &str = "\x1b[1;37m";
 
 // ANSI background color codes
-pub const BG_BLACK: &str = "\x1b[40;37m";
-pub const BG_RED: &str = "\x1b[41;37m";
-pub const BG_GREEN: &str = "\x1b[42;30m";
-pub const BG_YELLOW: &str = "\x1b[43;30m";
-pub const BG_BLUE: &str = "\x1b[44;37m";
-pub const BG_MAGENTA: &str = "\x1b[45;37m";
-pub const BG_CYAN: &str = "\x1b[46;37m";
-pub const BG_WHITE: &str = "\x1b[47;30m";
-pub const BG_NC: &str = "\x1b[49;37m"; // No Color
+pub const BG_BLACK: &str = "\x1b[1;40;37m";
+pub const BG_RED: &str = "\x1b[1;41;37m";
+pub const BG_GREEN: &str = "\x1b[1;42;30m";
+pub const BG_YELLOW: &str = "\x1b[1;43;30m";
+pub const BG_BLUE: &str = "\x1b[1;44;37m";
+pub const BG_MAGENTA: &str = "\x1b[1;45;37m";
+pub const BG_CYAN: &str = "\x1b[1;46;37m";
+pub const BG_WHITE: &str = "\x1b[1;47;30m";
+pub const BG_NC: &str = "\x1b[1;49;37m"; // No Color
 
 // Logging constants
 const LOG_INFO: &str = "\x1b[1;32mINFO    \x1b[0m";

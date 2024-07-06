@@ -3,10 +3,14 @@ use std::{collections::HashMap, env, path::PathBuf};
 use crate::{
     library::{
         config::services,
+        machine,
         system::{command, docker, pythonpath},
         utils::{bitwarden, env_vars, logging},
     },
-    models::config::{Config, ExposedValueType, Feature},
+    models::{
+        config::{Config, ExposedValueType, Feature},
+        machine_state::MachineState,
+    },
 };
 
 async fn prepare_features(
@@ -33,6 +37,7 @@ async fn prepare_features(
 }
 
 pub async fn get_exposed_variables(
+    machine_state: &MachineState,
     exposed_values: &Vec<ExposedValueType>,
     available_before_start: bool,
 ) -> Vec<(String, String)> {
@@ -44,7 +49,8 @@ pub async fn get_exposed_variables(
                 if available_before_start == exposed_value.available_before_start {
                     env_vars_to_return.push((
                         exposed_value.name.trim().to_uppercase(),
-                        exposed_value.value.trim().to_string(),
+                        machine::ports::replace_ports_in_text(machine_state, &exposed_value.value)
+                            .await,
                     ));
                 }
             }
@@ -101,6 +107,7 @@ pub async fn get_exposed_variables(
 /// - Add features
 /// - Set the environment variables
 pub async fn prepare(
+    machine_state: &MachineState,
     config: &Config,
     secrets: &serde_json::Value,
     no_services: bool,
@@ -121,13 +128,23 @@ pub async fn prepare(
         env_vars.push((
             key.to_string(),
             value.as_str().unwrap().to_string(),
-            "war machine".to_string(),
+            "war machine secrets".to_string(),
         ));
     }
 
     prepare_features(config, secrets, &mut env_vars).await;
 
     if !no_services {
+        // Set the available_before_start variables
+        for service in &config.services {
+            let exposed_values =
+                get_exposed_variables(&machine_state, &service.exposed_values, true).await;
+
+            for (key, value) in exposed_values {
+                env_vars.push((key, value, "war machine".to_string()));
+            }
+        }
+
         env_vars::set(&env_vars).await;
 
         // Login to all registries
@@ -142,22 +159,13 @@ pub async fn prepare(
                 std::process::exit(1);
             }
         }
-
-        // Set the available_before_start variables
-        for service in &config.services {
-            let exposed_values = get_exposed_variables(&service.exposed_values, true).await;
-
-            for (key, value) in exposed_values {
-                env_vars.push((key, value, "config file".to_string()));
-            }
-        }
     }
 
     if !no_services {
         logging::nl().await;
-        logging::print_color(logging::BG_YELLOW, "Starting local instances").await;
+        logging::print_color(logging::BG_YELLOW, " Starting local instances ").await;
 
-        services::start_all(config, clean_mode, true).await;
+        services::start_all(machine_state, config, clean_mode, true).await;
 
         // Logout from all registries
         for registry in &config.registry_credentials {
@@ -171,10 +179,11 @@ pub async fn prepare(
 
         // Set the available_before_start variables
         for service in &config.services {
-            let exposed_values = get_exposed_variables(&service.exposed_values, false).await;
+            let exposed_values =
+                get_exposed_variables(&machine_state, &service.exposed_values, false).await;
 
             for (key, value) in exposed_values {
-                env_vars.push((key, value, "config file".to_string()));
+                env_vars.push((key, value, "war machine".to_string()));
             }
         }
     }

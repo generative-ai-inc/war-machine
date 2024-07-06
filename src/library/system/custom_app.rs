@@ -1,19 +1,41 @@
-use crate::{library::utils::logging, models::config::AppSource};
+use crate::{
+    library::{machine, utils::logging},
+    models::{
+        config::{AppSource, Config},
+        machine_state::MachineState,
+    },
+};
 
 use super::command;
 
 /// Replaces the placeholders in the command with the actual values
-pub async fn replace_placeholders(command: &String, name: &str) -> String {
+pub async fn replace_placeholders(
+    machine_state: &MachineState,
+    config: &Config,
+    command: &String,
+    name: &str,
+) -> String {
     let mut new_command = command.to_string();
+    new_command = new_command.replace("${machine_name}", &config.machine_name);
     new_command = new_command.replace("${service.name}", name);
+    new_command = machine::ports::replace_ports_in_text(&machine_state, &new_command).await;
     new_command
 }
 
-pub async fn start_service(name: &str, source: &AppSource, clean_mode: bool, fail_fast: bool) {
-    let start_command = replace_placeholders(&source.start_command, name).await;
-    let health_check_command = replace_placeholders(&source.health_check_command, name).await;
+pub async fn start_service(
+    machine_state: &MachineState,
+    config: &Config,
+    name: &str,
+    source: &AppSource,
+    clean_mode: bool,
+    fail_fast: bool,
+) {
+    let start_command =
+        replace_placeholders(&machine_state, config, &source.start_command, name).await;
+    let health_check_command =
+        replace_placeholders(&machine_state, config, &source.health_check_command, name).await;
     let clean_command = if let Some(clean_command) = &source.clean_command {
-        Some(replace_placeholders(clean_command, name).await)
+        Some(replace_placeholders(&machine_state, config, clean_command, name).await)
     } else {
         None
     };

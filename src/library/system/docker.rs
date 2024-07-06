@@ -2,7 +2,13 @@ use futures::future::join_all;
 use std::error::Error;
 use tokio::{process::Command, sync::watch};
 
-use crate::{library::utils::logging, models::config::ContainerSource};
+use crate::{
+    library::{machine, utils::logging},
+    models::{
+        config::{Config, ContainerSource},
+        machine_state::MachineState,
+    },
+};
 
 use super::command;
 
@@ -136,32 +142,39 @@ pub async fn remove_containers(filter: &str) -> Result<(), Box<dyn Error>> {
 
 /// Replaces the placeholders in the command with the actual values
 pub async fn replace_placeholders(
+    machine_state: &MachineState,
+    config: &Config,
     command: &String,
     name: &str,
     source: &ContainerSource,
 ) -> String {
     let mut new_command = command.to_string();
+    new_command = new_command.replace("${machine_name}", &config.machine_name);
     new_command = new_command.replace("${service.name}", name);
     new_command = new_command.replace("${service.source.image}", &source.image);
     new_command = new_command.replace("${service.source.tag}", &source.tag);
     new_command = new_command.replace("${service.source.registry}", &source.registry);
+    new_command = machine::ports::replace_ports_in_text(&machine_state, &new_command).await;
     new_command
 }
 
 pub async fn start_service(
+    machine_state: &MachineState,
+    config: &Config,
     name: &str,
     source: &ContainerSource,
     clean_mode: bool,
     fail_fast: bool,
 ) {
     let start_command = if let Some(start_command) = &source.start_command {
-        Some(replace_placeholders(start_command, name, source).await)
+        Some(replace_placeholders(machine_state, config, start_command, name, source).await)
     } else {
         None
     };
 
     if clean_mode {
-        let remove_containers_result = remove_containers(&format!("name={}*", name)).await;
+        let remove_containers_result =
+            remove_containers(&format!("name={}-{}*", config.machine_name, name)).await;
 
         match remove_containers_result {
             Ok(_) => {

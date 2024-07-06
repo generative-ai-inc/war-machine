@@ -1,4 +1,4 @@
-machine_name = "war"
+machine_name = "wm"
 machine_description = "A war machine"
 requirements = ["brew", "docker", "pipx", "poetry"]
 registry_credentials = [
@@ -27,7 +27,7 @@ registry_credentials = [
   name = "redis"
   exposed_values = [
     { name = "REDIS_URL", value = "localhost" },
-    { name = "REDIS_PORT", value = "6379" },
+    { name = "REDIS_PORT", value = "${port.redis}" },
     { name = "REDIS_PASSWORD", value = "" },
   ]
 
@@ -37,7 +37,9 @@ registry_credentials = [
     registry = "docker.io"
 
     start_command = """
-      docker run -d --name ${service.name} -p 6379:6379 \
+      docker run -d \
+      --name ${machine_name}-${service.name} \
+      -p ${port.redis}:6379 \
       --health-cmd="redis-cli ping" \
       --health-interval=10s \
       --health-timeout=5s \
@@ -50,21 +52,26 @@ registry_credentials = [
   name = "qdrant"
   exposed_values = [
     { name = "QDRANT_API_URL", value = "localhost" },
-    { name = "QDRANT_API_PORT", value = "6333" },
+    { name = "QDRANT_API_PORT", value = "${port.qdrant}" },
     { name = "QDRANT_API_KEY", value = "" },
   ]
 
   [services.source]
-    image         = "qdrant/qdrant"
-    tag           = "latest"
-    registry      = "docker.io"
-    start_command = "docker run -d --name ${service.name} -p 6333:6333 ${service.source.image}:${service.source.tag}"
+    image = "qdrant/qdrant"
+    tag = "latest"
+    registry = "docker.io"
+    start_command = """
+    docker run -d \
+    --name ${machine_name}-${service.name} \
+    -p ${port.qdrant}:6333 \
+    ${service.source.image}:${service.source.tag}
+    """
 
 
 [[services]]
   name = "meili"
   exposed_values = [
-    { name = "MEILISEARCH_URL", value = "http://localhost:7700" },
+    { name = "MEILISEARCH_URL", value = "http://localhost:${port.meili}" },
     { name = "MEILISEARCH_KEY", value = "a_UTF-8_string_of_at_least_16_bytes" },
   ]
 
@@ -73,7 +80,10 @@ registry_credentials = [
     tag      = "latest"
     registry = "docker.io"
 
-    start_command = """docker run -d --name ${service.name} -p 7700:7700 \
+    start_command = """
+    docker run -d \
+    --name ${machine_name}-${service.name} \
+    -p ${port.meili}:7700 \
     -v $(pwd)/meili_data:/meili_data \
     -e MEILI_MASTER_KEY=$MEILISEARCH_KEY \
     ${service.source.image}:${service.source.tag}
@@ -117,6 +127,10 @@ registry_credentials = [
     tag      = "staging"
     registry = "ghcr.io"
 
-    start_command = """docker run -d --name ${service.name} --net=host \
+    start_command = """
+    docker run -d \
+    --name ${machine_name}-${service.name} \
+    --net=host \
+    -e REDIS_PORT=${port.redis} \
     ${service.source.registry}/${service.source.image}:${service.source.tag}
     """

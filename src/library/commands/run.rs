@@ -1,10 +1,14 @@
 use tokio::process::Command;
 
-use crate::{library::utils::logging, models::config::Config};
+use crate::{
+    library::utils::logging,
+    models::{config::Config, machine_state::MachineState},
+};
 
 use super::prepare;
 
 pub async fn run(
+    machine_state: MachineState,
     config: Config,
     secrets: serde_json::Value,
     command_name: Option<String>,
@@ -12,13 +16,13 @@ pub async fn run(
     clean_mode: bool,
     command_args: String,
 ) {
-    prepare(&config, &secrets, no_services, clean_mode).await;
+    prepare(&machine_state, &config, &secrets, no_services, clean_mode).await;
 
     if let Some(command_name) = command_name {
         let command = config.commands.get(&command_name).unwrap();
         let command = format!("{} {}", command, command_args);
         logging::nl().await;
-        logging::print_color(logging::BG_GREEN, "Starting service").await;
+        logging::print_color(logging::BG_GREEN, " Starting service ").await;
         logging::info(&format!("Running: {}", command)).await;
         let child = Command::new("sh")
             .arg("-c")

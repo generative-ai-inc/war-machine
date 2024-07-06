@@ -9,7 +9,7 @@ pub async fn print_variables_box(
     env_vars: &Vec<(String, String, String)>,
 ) {
     logging::nl().await;
-    logging::print_color(logging::BG_BLUE, "Environment variables").await;
+    logging::print_color(logging::BG_BLUE, " Environment variables ").await;
 
     // We need to find the longest key so we can align the table
     let longest_key = env_vars.iter().max_by_key(|(key, _, _)| key.len());
@@ -43,12 +43,17 @@ pub async fn print_variables_box(
         &format!("├─{}─┼─{}─┤", key_margin, source_margin),
     )
     .await;
-    for (key, _, source) in env_vars {
+
+    // Sort by key
+    let mut sorted_env_vars = env_vars.clone();
+    sorted_env_vars.sort_by_key(|(key, _, _)| key.clone());
+
+    for (key, _, source) in sorted_env_vars {
         let parsed_key = format!("{:<width$}", key, width = longest_key_len);
         let mut parsed_source = format!("{:<width$}", source, width = longest_source_len);
 
         // Check if the key is already set
-        if original_env_vars.contains_key(key) {
+        if original_env_vars.contains_key(&key) {
             parsed_source = format!("{:<width$}", "local", width = longest_source_len);
         }
 
