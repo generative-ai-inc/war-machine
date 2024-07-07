@@ -22,6 +22,34 @@ pub async fn replace_placeholders(
     new_command
 }
 
+pub async fn check_installation(
+    installation_check_command: &String,
+    install_command: &String,
+    name: &str,
+) {
+    let installation_check_results = command::run(&installation_check_command).await;
+
+    match installation_check_results {
+        Ok(_) => {
+            logging::info(&format!("✅ {} is installed", name)).await;
+        }
+        Err(_) => {
+            logging::warn(&format!("{} is not installed. Installing...", name)).await;
+            let install_results = command::spawn(&install_command).await;
+
+            match install_results {
+                Ok(_) => {}
+                Err(e) => {
+                    logging::error(&format!("🛑 Failed to install {}", name)).await;
+                    logging::error(&e.to_string()).await;
+
+                    std::process::exit(1);
+                }
+            }
+        }
+    }
+}
+
 pub async fn start_service(
     machine_state: &MachineState,
     config: &Config,
@@ -30,6 +58,12 @@ pub async fn start_service(
     clean_mode: bool,
     fail_fast: bool,
 ) {
+    let install_command =
+        replace_placeholders(&machine_state, config, &source.install_command, name).await;
+
+    let installation_check_command =
+        replace_placeholders(&machine_state, config, &source.install_check_command, name).await;
+
     let start_command =
         replace_placeholders(&machine_state, config, &source.start_command, name).await;
     let health_check_command =
@@ -39,6 +73,8 @@ pub async fn start_service(
     } else {
         None
     };
+
+    check_installation(&installation_check_command, &install_command, name).await;
 
     if clean_mode {
         if let Some(clean_command) = clean_command.clone() {
@@ -63,12 +99,8 @@ pub async fn start_service(
                 logging::info(&format!("✅ {} is running", name)).await;
                 return;
             }
-            Err(e) => {
-                logging::error(&format!("Failed to check if {} is running: {}", name, e)).await;
-
-                if fail_fast {
-                    std::process::exit(1);
-                }
+            Err(_) => {
+                logging::warn(&format!("{} is not running. Starting...", name)).await;
             }
         }
     }
