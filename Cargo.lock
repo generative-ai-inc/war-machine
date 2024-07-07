@@ -2084,7 +2084,7 @@ dependencies = [
 
 [[package]]
 name = "war_machine"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "built",
  "clap",
