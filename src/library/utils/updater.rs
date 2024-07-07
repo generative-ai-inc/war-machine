@@ -82,7 +82,7 @@ pub async fn update() {
     }
 
     let asset_name = format!(
-        "wm-{}-{}",
+        "war-machine-{}-{}",
         arch.to_lowercase().trim(),
         os.to_lowercase().trim()
     );
