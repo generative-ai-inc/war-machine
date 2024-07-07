@@ -7,9 +7,11 @@ abort() {
 
 echo "Installing War Machine to /usr/local/bin"
 
-GITHUB_TOKEN=""
-read -sp "Enter your GITHUB_TOKEN:" GITHUB_TOKEN
-echo
+# In CI we expect GITHUB_TOKEN to be set
+if [ -z "$GITHUB_TOKEN" ]; then
+  read -sp "Enter your GITHUB_TOKEN:" GITHUB_TOKEN
+  echo
+fi
 
 WM_DIR="/usr/local/bin"
 WM_PATH="${WM_DIR}/war-machine"
