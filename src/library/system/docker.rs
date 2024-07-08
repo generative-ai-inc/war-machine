@@ -37,6 +37,31 @@ pub async fn logout(registry: &str) -> Result<(), Box<dyn Error>> {
     }
 }
 
+pub async fn create_network(name: &str) -> Result<(), Box<dyn Error>> {
+    let existing_networks_result = command::run("docker network ls --format '{{.Name}}'").await;
+
+    let network_exists = match existing_networks_result {
+        Ok(output) => output.contains(name),
+        Err(e) => {
+            logging::error(&format!("Failed to get existing networks: {}", e)).await;
+            return Err(Box::from(e));
+        }
+    };
+
+    if network_exists {
+        return Ok(());
+    }
+
+    let command = format!("docker network create {}", name);
+
+    let create_network_result = command::run(command.as_str()).await;
+
+    match create_network_result {
+        Ok(_) => Ok(()),
+        Err(e) => Err(Box::from(e)),
+    }
+}
+
 pub async fn pull_image(registry: &str, image: &str, tag: &str) -> Result<(), Box<dyn Error>> {
     let logout_result =
         command::spawn(format!("docker pull {}/{}:{}", registry, image, tag).as_str()).await;

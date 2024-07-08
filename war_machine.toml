@@ -1,9 +1,10 @@
-machine_name = "wm"
+machine_name = "atlas-api-server"
 machine_description = "A war machine"
 requirements = ["brew", "docker", "pipx", "poetry"]
 registry_credentials = [
   { registry = "ghcr.io", username = "GITHUB_USERNAME", password = "GITHUB_TOKEN" },
 ]
+networks = ["container_network"]
 
 [commands]
   start = "poetry run hypercorn app.main:app --bind 127.0.0.1:8000 --config hypercorn.toml"
@@ -39,6 +40,7 @@ registry_credentials = [
     start_command = """
       docker run -d \
       --name ${machine_name}-${service.name} \
+      --network container_network \
       -p ${port.redis}:6379 \
       --health-cmd="redis-cli ping" \
       --health-interval=10s \
@@ -63,6 +65,7 @@ registry_credentials = [
     start_command = """
     docker run -d \
     --name ${machine_name}-${service.name} \
+    --network container_network \
     -p ${port.qdrant}:6333 \
     ${service.source.image}:${service.source.tag}
     """
@@ -83,6 +86,7 @@ registry_credentials = [
     start_command = """
     docker run -d \
     --name ${machine_name}-${service.name} \
+    --network container_network \
     -p ${port.meili}:7700 \
     -v $(pwd)/meili_data:/meili_data \
     -e MEILI_MASTER_KEY=$MEILISEARCH_KEY \
@@ -93,8 +97,9 @@ registry_credentials = [
     #   name = "supabase"
 
     #   [services.source]
-    #     install_command       = "brew install supabase/supabase/supabase"
-    #     health_check_command  = "supabase --version"
+    #     install_command       = "brew install supabase/tap/supabase"
+    #     install_check_command = "supabase --version"
+    #     health_check_command  = "supabase status"
     #     version_check_command = "supabase --version"
     #     start_command         = "supabase start"
 
@@ -127,10 +132,12 @@ registry_credentials = [
     tag      = "staging"
     registry = "ghcr.io"
 
+    # Using 6379 as we are connecting to the non-exposed port
     start_command = """
     docker run -d \
     --name ${machine_name}-${service.name} \
-    --net=host \
-    -e REDIS_PORT=${port.redis} \
+    --network container_network \
+    -e REDIS_HOST=atlas-api-server-redis \
+    -e REDIS_PORT=6379 \
     ${service.source.registry}/${service.source.image}:${service.source.tag}
     """

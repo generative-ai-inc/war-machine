@@ -119,6 +119,10 @@ pub struct RegistryCredentials {
     pub password: String,
 }
 
+fn default_networks() -> Vec<String> {
+    vec![]
+}
+
 fn default_requirements() -> Vec<Requirement> {
     vec![]
 }
@@ -148,6 +152,9 @@ pub struct Config {
     pub machine_name: String,
 
     pub machine_description: Option<String>,
+
+    #[serde(default = "default_networks")]
+    pub networks: Vec<String>,
 
     #[serde(default = "default_requirements")]
     pub requirements: Vec<Requirement>,

@@ -102,10 +102,24 @@ pub async fn get_exposed_variables(
     env_vars_to_return
 }
 
+async fn create_docker_networks(config: &Config) {
+    for network in &config.networks {
+        let result = docker::create_network(network).await;
+        match result {
+            Ok(_) => (),
+            Err(e) => {
+                logging::error(&format!("Failed to create network {}: {}", network, e)).await;
+                std::process::exit(1);
+            }
+        }
+    }
+}
+
 /// Prepare the environment for the service to run.
-/// - Start local instances
 /// - Add features
 /// - Set the environment variables
+/// - Create docker networks
+/// - Start local instances
 pub async fn prepare(
     machine_state: &MachineState,
     config: &Config,
@@ -133,6 +147,8 @@ pub async fn prepare(
     }
 
     prepare_features(config, secrets, &mut env_vars).await;
+
+    create_docker_networks(config).await;
 
     if !no_services {
         // Set the available_before_start variables
