@@ -67,9 +67,19 @@ pub async fn run(
             }
         });
 
-        let _output = handle.await.expect("Failed to wait for main command");
+        let output = handle.await;
 
-        logging::error("Failed to run service").await;
-        std::process::exit(1);
+        match output {
+            Ok(output) => {
+                if output.status.success() {
+                    std::process::exit(0);
+                } else {
+                    std::process::exit(1);
+                }
+            }
+            Err(e) => {
+                logging::error(&format!("🛑 Failed to wait for main command: {}", e)).await;
+            }
+        }
     }
 }
