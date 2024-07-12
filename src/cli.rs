@@ -48,7 +48,7 @@ pub fn build() -> Command {
             )
             .required(false)
             .value_parser(value_parser!(String))
-            .value_hint(ValueHint::Other)
+            .value_hint(ValueHint::AnyPath)
             .allow_hyphen_values(true)
             .last(true)
         )
