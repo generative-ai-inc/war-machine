@@ -52,13 +52,13 @@ jobs:
       - name: Copy binary (macOS)
         if: matrix.platform == 'macos-latest'
         run: |
-          cp target/aarch64-apple-darwin/release/war_machine target/release/war-machine-aarch64-darwin
-          cp target/x86_64-apple-darwin/release/war_machine target/release/war-machine-x86_64-darwin
+          cp target/aarch64-apple-darwin/release/wm target/release/war-machine-arm64-darwin
+          cp target/x86_64-apple-darwin/release/wm target/release/war-machine-x86_64-darwin
 
       - name: Copy binary (Linux)
         if: matrix.platform == 'ubuntu-latest'
         run: |
-          cp target/x86_64-unknown-linux-gnu/release/war_machine target/release/war-machine-x86_64-linux
+          cp target/x86_64-unknown-linux-gnu/release/wm target/release/war-machine-x86_64-linux
 
       - name: Release
         uses: softprops/action-gh-release@v2

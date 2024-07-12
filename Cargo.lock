@@ -524,9 +524,9 @@ dependencies = [
 
 [[package]]
 name = "keyring"
-version = "3.0.0"
+version = "3.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3897666466af107fe772e019d33341375f41f5a5e12964b6766a88c7416680bf"
+checksum = "f32930aef50aff920e88e6cf66b70a6d587a6f2bae6aeade5c1e583661a40f8e"
 
 [[package]]
 name = "lazy_static"
@@ -1220,28 +1220,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "war_machine"
-version = "0.1.3"
-dependencies = [
- "built",
- "clap",
- "clap_complete",
- "dotenv",
- "fastrand",
- "futures",
- "keyring",
- "lazy_static",
- "os_info",
- "regex",
- "reqwest",
- "rpassword",
- "serde",
- "serde_json",
- "tokio",
- "toml",
-]
-
-[[package]]
 name = "wasi"
 version = "0.11.0+wasi-snapshot-preview1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1479,4 +1457,26 @@ checksum = "a277a57398d4bfa075df44f501a17cfdf8542d224f0d36095a2adc7aee4ef0a5"
 dependencies = [
  "cfg-if",
  "windows-sys 0.48.0",
+]
+
+[[package]]
+name = "wm"
+version = "0.1.3"
+dependencies = [
+ "built",
+ "clap",
+ "clap_complete",
+ "dotenv",
+ "fastrand",
+ "futures",
+ "keyring",
+ "lazy_static",
+ "os_info",
+ "regex",
+ "reqwest",
+ "rpassword",
+ "serde",
+ "serde_json",
+ "tokio",
+ "toml",
 ]

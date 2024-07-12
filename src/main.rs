@@ -4,12 +4,12 @@ use lazy_static::lazy_static;
 use serde_json::{json, Value};
 use std::io;
 use std::path::PathBuf;
-use war_machine::library::commands::run;
-use war_machine::library::config::{commands, features, requirements};
-use war_machine::library::machine;
-use war_machine::library::secrets::{generic, keyring};
-use war_machine::library::system::config;
-use war_machine::library::utils::{env_vars, logging, updater};
+use wm::library::commands::run;
+use wm::library::config::{commands, features, requirements};
+use wm::library::machine;
+use wm::library::secrets::{generic, keyring};
+use wm::library::system::config;
+use wm::library::utils::{env_vars, logging, updater};
 
 mod cli;
 
@@ -105,7 +105,6 @@ async fn main() {
         if let Some(completions_matches) = matches.subcommand_matches("completions") {
             if let Some(shell) = completions_matches.get_one::<Shell>("shell").copied() {
                 let mut cmd = cli::build();
-                eprintln!("Generating completion file for {}...", shell);
                 print_completions(shell, &mut cmd);
             }
         }

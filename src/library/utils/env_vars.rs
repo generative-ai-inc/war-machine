@@ -105,7 +105,7 @@ pub async fn make_sure_exists(secrets: Option<&serde_json::Value>, name: &str) {
 
         if secrets_value.get(name).is_none() {
             logging::error(&format!(
-                "Secret {} is not set, please set it with `war secret add {}`. Alternatively, you can set it in your environment variables.",
+                "Secret {} is not set, please set it with `wm secret add {}`. Alternatively, you can set it in your environment variables.",
                 name, name,
             ))
             .await;

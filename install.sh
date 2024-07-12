@@ -14,7 +14,7 @@ if [ -z "$GITHUB_TOKEN" ]; then
 fi
 
 WM_DIR="/usr/local/bin"
-WM_PATH="${WM_DIR}/war-machine"
+WM_PATH="${WM_DIR}/wm"
 
 OS="$(/usr/bin/uname -s)"
 ARCH="$(/usr/bin/uname -m)"
@@ -38,13 +38,12 @@ fi
 # Add accepts header to the request
 sudo curl -H "Authorization: bearer ${GITHUB_TOKEN}" -H "Accept: application/octet-stream" -fsSL "${ASSET_URL}" -o "${WM_PATH}"
 
-# Symlink the war-machine command to war
-sudo ln -sf "${WM_PATH}" "${WM_DIR}/war"
-
-# Symlink the war-machine command to wm
-sudo ln -sf "${WM_PATH}" "${WM_DIR}/wm"
-
 sudo chmod +x "${WM_PATH}"
-echo "🔫 War Machine installed. Run 'war-machine' to get started."
+echo "🔫 War Machine installed. Run 'wm' to get started."
 
 ${WM_PATH} secret add GITHUB_TOKEN ${GITHUB_TOKEN}
+
+# Previously, we used to install to /usr/local/bin/war-machine and /usr/local/bin/war
+# We remove these files, if they exist, to avoid confusion
+sudo rm -f /usr/local/bin/war-machine
+sudo rm -f /usr/local/bin/war
