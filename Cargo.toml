@@ -14,7 +14,13 @@
   dotenv = "0.15.0"
   fastrand = "2.1.0"
   futures = "0.3.30"
-  keyring = "3.0.1"
+  keyring = { version = "3.0.1", features = [
+    "async-secret-service",
+    "apple-native",
+    "windows-native",
+    "async-io",
+    "crypto-rust",
+  ] }
   lazy_static = "1.5.0"
   os_info = "3.8.2"
   regex = "1.7.0"
