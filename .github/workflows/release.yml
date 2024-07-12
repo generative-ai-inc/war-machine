@@ -67,6 +67,6 @@ jobs:
         with:
           draft: true
           files: |
-            target/release/war-machine-aarch64-darwin
+            target/release/war-machine-arm64-darwin
             target/release/war-machine-x86_64-darwin
             target/release/war-machine-x86_64-linux
