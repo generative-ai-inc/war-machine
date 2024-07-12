@@ -26,8 +26,9 @@ ASSET_NAME="war-machine-${ARCH}-${OS}"
 # Get the latest release information
 RELEASE_INFO=$(curl -H "Authorization: bearer ${GITHUB_TOKEN}" -fsSL https://api.github.com/repos/generative-ai-inc/war-machine/releases/latest)
 
-# Extract the asset download URL
-ASSET_URL=$(echo $RELEASE_INFO | jq -r ".assets[] | select(.name == \"$ASSET_NAME\") | .url")
+# # Extract the asset download URL
+ASSET_URL=$(echo $RELEASE_INFO | python3 -c "import sys, json; data = json.load(sys.stdin); print(next(asset['url'] for asset in data['assets'] if asset['name'] == '$ASSET_NAME'))")
+
 
 # Check if the asset URL is found
 if [ -z "$ASSET_URL" ]; then
