@@ -2,16 +2,22 @@
 
 War Machine is a tool for managing and installing services, tools, and libraries. Sort of like docker-compose, but also supports services that don't use docker.
 
-Supported platforms:
-
+Supported platforms (Contributions welcome!):
 - MacOS
 - Linux
-- Windows(Contributions welcome!)
 
 ## Installation
 
 ```sh
 bash <(curl -sS "https://raw.githubusercontent.com/generative-ai-inc/war-machine/main/install.sh")
+```
+
+### Running
+Set up your `war_machine.toml` configuration file. See [war_machine.toml](https://github.com/generative-ai-inc/war-machine/blob/main/war_machine.toml) for an example.
+
+Then run:
+```sh
+wm run <command-name>
 ```
 
 ### Private Image Access
