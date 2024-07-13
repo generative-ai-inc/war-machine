@@ -35,11 +35,17 @@ jobs:
       - name: Install dependencies (Linux only)
         if: matrix.platform == 'ubuntu-latest'
         run: |
+          sudo apt-get update && sudo apt-get install -y gcc-aarch64-linux-gnu
+          rustup target add aarch64-unknown-linux-musl
           rustup target add x86_64-unknown-linux-gnu
 
-      - name: Build (Linux)
+      - name: Build x86_64 (Linux)
         if: matrix.platform == 'ubuntu-latest'
         run: cargo build --release --target x86_64-unknown-linux-gnu
+
+      - name: Build aarch64 (Linux)
+        if: matrix.platform == 'ubuntu-latest'
+        run: cargo build --release --target aarch64-unknown-linux-musl
 
       - name: Build for ARM (macOS)
         if: matrix.platform == 'macos-latest'
@@ -59,6 +65,7 @@ jobs:
         if: matrix.platform == 'ubuntu-latest'
         run: |
           cp target/x86_64-unknown-linux-gnu/release/wm target/release/war-machine-x86_64-linux
+          cp target/aarch64-unknown-linux-musl/release/wm target/release/war-machine-arm64-linux
 
       - name: Release
         uses: softprops/action-gh-release@v2
