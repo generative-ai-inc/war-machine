@@ -13,10 +13,19 @@ pub async fn run(
     secrets: serde_json::Value,
     command_name: Option<String>,
     no_services: bool,
+    no_features: bool,
     clean_mode: bool,
     command_args: String,
 ) {
-    prepare(&machine_state, &config, &secrets, no_services, clean_mode).await;
+    prepare(
+        &machine_state,
+        &config,
+        &secrets,
+        no_services,
+        no_features,
+        clean_mode,
+    )
+    .await;
 
     if let Some(command_name) = command_name {
         let pre_command_result = config.pre_commands.get(&command_name);

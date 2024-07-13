@@ -34,6 +34,8 @@ async fn main() {
     // Run options
     let mut clean_mode = false;
     let mut no_services = false;
+    let mut no_features = false;
+    let mut no_requirements = false;
     let mut config_path = CONFIG_PATH.clone();
 
     let matches = cli::build().get_matches();
@@ -63,6 +65,16 @@ async fn main() {
                 no_services = true;
             }
 
+            if run_matches.get_flag("no-features") {
+                logging::warn("Running without features").await;
+                no_features = true;
+            }
+
+            if run_matches.get_flag("no-requirements") {
+                logging::warn("Running without requirements").await;
+                no_requirements = true;
+            }
+
             if run_matches.get_flag("clean") {
                 logging::warn("Cleaning the docker environment before starting the server").await;
                 clean_mode = true;
@@ -86,8 +98,12 @@ async fn main() {
 
         let secrets = keyring::get_secrets().await;
 
-        features::check(&config, &secrets).await;
-        requirements::check(&config).await;
+        if !no_features {
+            features::check(&config, &secrets).await;
+        }
+        if !no_requirements {
+            requirements::check(&config).await;
+        }
 
         run(
             machine_state,
@@ -95,6 +111,7 @@ async fn main() {
             secrets,
             command_name,
             no_services,
+            no_features,
             clean_mode,
             command_args,
         )

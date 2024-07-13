@@ -36,6 +36,20 @@ pub fn build() -> Command {
         )
         .arg(
             arg!(
+                --"no-features" "Do not use features"
+            )
+            .required(false)
+            .action(ArgAction::SetTrue),
+        )
+        .arg(
+            arg!(
+                --"no-requirements" "Do not install requirements"
+            )
+            .required(false)
+            .action(ArgAction::SetTrue),
+        )
+        .arg(
+            arg!(
                 --clean "Clean the docker environment before starting the server"
             )
             .required(false)
