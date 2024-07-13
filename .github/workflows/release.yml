@@ -35,7 +35,7 @@ jobs:
       - name: Install dependencies (Linux only)
         if: matrix.platform == 'ubuntu-latest'
         run: |
-          sudo apt-get update && sudo apt-get install -y gcc-aarch64-linux-gnu
+          sudo apt-get update && sudo apt-get install -y musl-tools gcc-aarch64-linux-gnu
           rustup target add aarch64-unknown-linux-musl
           rustup target add x86_64-unknown-linux-musl
 
@@ -65,7 +65,7 @@ jobs:
         if: matrix.platform == 'ubuntu-latest'
         run: |
           cp target/x86_64-unknown-linux-musl/release/wm target/release/war-machine-x86_64-linux
-          cp target/aarch64-unknown-linux-musl/release/wm target/release/war-machine-arm64-linux
+          cp target/aarch64-unknown-linux-musl/release/wm target/release/war-machine-aarch64-linux
 
       - name: Release
         uses: softprops/action-gh-release@v2
@@ -76,4 +76,5 @@ jobs:
           files: |
             target/release/war-machine-arm64-darwin
             target/release/war-machine-x86_64-darwin
+            target/release/war-machine-aarch64-linux
             target/release/war-machine-x86_64-linux
