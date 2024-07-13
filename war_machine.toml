@@ -1,4 +1,4 @@
-machine_name = "atlas-api-server"
+machine_name = "war-machine-example"
 machine_description = "A war machine"
 requirements = ["brew", "docker", "pipx", "poetry"]
 registry_credentials = [

@@ -1,27 +1,54 @@
 # War Machine
 
-War Machine is a tool for managing and installing services, tools, and libraries.
+War Machine is a tool for managing and installing services, tools, and libraries. Sort of like docker-compose, but also supports services that don't use docker.
+
+Supported platforms (Contributions welcome!):
+- MacOS
+- Linux
 
 ## Installation
 
-1. On Github, create a personal access token with the `repo` scope and `read:packages` scope. This is necessary to download our services from the private repos. You can create it at [https://github.com/settings/tokens](https://github.com/settings/tokens).
-2. Run the installation script. It will ask you to enter your github token.
+```sh
+bash <(curl -sS "https://raw.githubusercontent.com/generative-ai-inc/war-machine/main/install.sh")
+```
 
-   ```sh
-   bash <(curl -sS https://gixuqotpkdlrfbermgnf.supabase.co/storage/v1/object/public/dev/install.sh)
-   ```
+### Running
+Set up your `war_machine.toml` configuration file. See [war_machine.toml](https://github.com/generative-ai-inc/war-machine/blob/main/war_machine.toml) for an example.
 
-3. Add your github username to War Machine with the following command:
+Then run:
+```sh
+wm run <command-name>
+```
 
-   ```sh
-   wm secret add GITHUB_USERNAME <github-username>
-   ```
+### Private Image Access
 
-4. Add your bitwarden secret manager access token to War Machine with the following command:
+In your `war_machine.toml` file you need to add one or more registry credentials:
 
-   ```sh
-   wm secret add BWS_ACCESS_TOKEN
-   ```
+```toml
+registry_credentials = [
+  { registry = "ghcr.io", username = "GITHUB_USERNAME", password = "GITHUB_TOKEN" },
+  { registry = "docker.io", username = "DOCKER_USERNAME", password = "DOCKER_PASSWORD" },
+]
+```
+
+These credentials will be read from env variables, env file, or keyring. You can add them to the keyring with the `wm secret add` command. For example:
+
+```sh
+wm secret add GITHUB_USERNAME <github-username>
+wm secret add GITHUB_TOKEN
+```
+
+Github Personal Access Tokens should have the following scopes:
+
+- `read:packages`
+
+### Bitwarden Secret Manager
+
+To use the bitwarden secret manager, you need to have the BWS_ACCESS_TOKEN variable set. We recommend using the keyring to store this token. You can do this with the following command:
+
+```sh
+wm secret add BWS_ACCESS_TOKEN
+```
 
 ## Suggestions
 
@@ -46,11 +73,3 @@ wm completions <shell>
 ```
 
 If you are not sure what to do with the output of this command, the people from Alacritty have a good [guide](https://github.com/alacritty/alacritty/blob/master/INSTALL.md#shell-completions) on how to add shell completions to your shell. In the guide it is assumed that you are adding the completions for the `alacritty` command, but the process is similar for other commands, like `wm`.
-
-## Notes
-
-After the installations completes, War Machine will keep a copy of your github token as a secret saved in the keyring. You can remove any secret with the following command:
-
-```sh
-wm secret remove <secret-name>
-```
