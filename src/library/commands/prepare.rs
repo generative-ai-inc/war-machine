@@ -178,16 +178,6 @@ pub async fn prepare(
                 std::process::exit(1);
             }
         }
-
-        // Set the available_before_start variables
-        for service in &config.services {
-            let exposed_values =
-                get_exposed_variables(&machine_state, &service.exposed_values, false).await;
-
-            for (key, value) in exposed_values {
-                env_vars.push((key, value, "war machine".to_string()));
-            }
-        }
     }
 
     env_vars::set(&env_vars).await;

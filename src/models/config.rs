@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum Requirement {
     BREW,
@@ -16,7 +16,7 @@ fn default_registry() -> String {
     "docker.io".to_string()
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, PartialEq)]
 pub struct ContainerSource {
     pub image: String,
     pub tag: String,
@@ -27,7 +27,7 @@ pub struct ContainerSource {
     pub registry: String,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, PartialEq)]
 pub struct AppSource {
     pub install_command: String,
     pub install_check_command: String,
@@ -37,20 +37,20 @@ pub struct AppSource {
     pub clean_command: Option<String>,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, PartialEq)]
 #[serde(untagged)]
 pub enum Source {
     CONTAINER(ContainerSource),
     APP(AppSource),
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, PartialEq)]
 pub struct PythonpathFeature {
     pub env_file_path: String,
     pub pythonpath_value: String,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, PartialEq)]
 #[serde(rename_all = "lowercase", tag = "name")]
 pub enum Feature {
     PYTHONPATH(PythonpathFeature),
@@ -68,7 +68,7 @@ fn default_rename() -> HashMap<String, String> {
     HashMap::new()
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, PartialEq)]
 pub struct ExposedValueCommand {
     pub command: String,
     pub description: Option<String>,
@@ -80,7 +80,7 @@ pub struct ExposedValueCommand {
     pub rename: HashMap<String, String>,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, PartialEq)]
 pub struct ExposedValueLiteral {
     pub name: String,
     pub value: String,
@@ -89,7 +89,7 @@ pub struct ExposedValueLiteral {
     pub available_before_start: bool,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, PartialEq)]
 #[serde(rename_all = "lowercase", untagged)]
 pub enum ExposedValueType {
     COMMAND(ExposedValueCommand),
@@ -100,7 +100,11 @@ fn default_exposed_values() -> Vec<ExposedValueType> {
     vec![]
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+fn default_depends_on() -> Vec<String> {
+    vec![]
+}
+
+#[derive(Deserialize, Serialize, Debug, PartialEq)]
 pub struct Service {
     pub name: String,
 
@@ -110,9 +114,12 @@ pub struct Service {
     pub source: Source,
     pub start_command: Option<String>,
     pub clean_command: Option<String>,
+
+    #[serde(default = "default_depends_on")]
+    pub depends_on: Vec<String>,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, PartialEq)]
 pub struct RegistryCredentials {
     pub registry: String,
     pub username: String,
@@ -147,7 +154,7 @@ fn default_registry_credentials() -> Vec<RegistryCredentials> {
     vec![]
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, PartialEq)]
 pub struct Config {
     pub machine_name: String,
 
