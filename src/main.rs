@@ -5,7 +5,7 @@ use serde_json::{json, Value};
 use std::io;
 use std::path::PathBuf;
 use wm::library::commands::run;
-use wm::library::config::{commands, features, requirements};
+use wm::library::config::{commands, dependencies, features, requirements};
 use wm::library::machine;
 use wm::library::secrets::{generic, keyring};
 use wm::library::system::config;
@@ -103,6 +103,10 @@ async fn main() {
         }
         if !no_requirements {
             requirements::check(&config).await;
+        }
+
+        if !no_services {
+            dependencies::check(&config).await;
         }
 
         run(
