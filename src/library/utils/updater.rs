@@ -44,7 +44,14 @@ async fn schedule_replace_and_restart(
 }
 
 pub async fn update() {
-    let github_token = std::env::var("GITHUB_TOKEN").expect("GITHUB_TOKEN must be set");
+    // Check for elevated privileges
+    if !nix::unistd::Uid::effective().is_root() {
+        logging::error(
+            "🛑 Update failed: Please run the updater with elevated privileges (e.g., using sudo).",
+        )
+        .await;
+        std::process::exit(1);
+    }
 
     logging::info("Updating War Machine...").await;
 
@@ -93,7 +100,6 @@ pub async fn update() {
     let response = client
         .get("https://api.github.com/repos/generative-ai-inc/war-machine/releases/latest")
         .header("Accept", "application/json")
-        .header("Authorization", &format!("token {}", github_token))
         .header("User-Agent", "wm")
         .send()
         .await;
@@ -146,7 +152,6 @@ pub async fn update() {
 
     let response = client
         .get(download_url)
-        .header("Authorization", &format!("token {}", github_token))
         .header("Accept", "application/octet-stream")
         .header("User-Agent", "wm")
         .send()
