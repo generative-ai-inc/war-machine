@@ -2259,7 +2259,7 @@ dependencies = [
 
 [[package]]
 name = "wm"
-version = "0.1.9"
+version = "0.1.10"
 dependencies = [
  "built",
  "clap",
