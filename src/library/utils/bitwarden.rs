@@ -24,7 +24,7 @@ pub async fn get_env_variables(secrets: &serde_json::Value) -> Vec<(String, Stri
             if bitwarden_output.status.success() {
                 logging::info("Retrieved bitwarden environment variables").await;
 
-                let re = Regex::new(r#"^([A-Z_]+)="(.+)""#).unwrap();
+                let re = Regex::new(r#"^([A-Z0-9_]+)="(.+)""#).unwrap();
 
                 let env_vars_str = String::from_utf8_lossy(&bitwarden_output.stdout);
                 let mut env_vars: Vec<(String, String)> = Vec::new();
