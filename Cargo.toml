@@ -40,4 +40,4 @@
     "rt-multi-thread",
     "io-util",
   ] }
-  toml = "0.8.16"
+  toml = "0.8.19"
