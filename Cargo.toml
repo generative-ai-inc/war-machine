@@ -30,7 +30,7 @@
     "rustls-tls",
   ], default-features = false }
   rpassword = "7.3.1"
-  serde = "1.0.205"
+  serde = "1.0.207"
   serde_json = { version = "1.0.122", features = ["std"] }
   tokio = { version = "1.39.1", features = [
     "macros",
