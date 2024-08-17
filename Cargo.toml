@@ -14,7 +14,7 @@
   dotenv = "0.15.0"
   fastrand = "2.1.0"
   futures = "0.3.30"
-  keyring = { version = "3.0.5", features = [
+  keyring = { version = "3.1.0", features = [
     "async-secret-service",
     "apple-native",
     "windows-native",
