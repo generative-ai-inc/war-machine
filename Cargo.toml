@@ -12,7 +12,7 @@
   clap = { version = "4.5.16", features = ["derive", "cargo"] }
   clap_complete = "4.5.23"
   dotenv = "0.15.0"
-  fastrand = "2.1.0"
+  fastrand = "2.1.1"
   futures = "0.3.30"
   keyring = { version = "3.2.0", features = [
     "async-secret-service",
