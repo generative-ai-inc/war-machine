@@ -140,9 +140,43 @@ pub async fn get(name: &str) -> String {
     }
 
     logging::error(&format!(
-            "Secret {} is not set, please set it with `wm secret add {}`. Alternatively, you can set it in your environment variables.",
+            "Secret {} is not set, please set it with `wm secret add {}`. Alternatively, you can set it in your .env file.",
             name, name,
         ))
         .await;
     std::process::exit(1);
+}
+
+/// Replaces the environment variables in the string with the actual values
+pub async fn replace_env_vars(text: &str) -> String {
+    // Match $VAR_NAME or ${VAR_NAME}
+    let re = Regex::new(r"\$\{?(\w+)\}?").unwrap();
+
+    // Initialize a new String to build the result
+    let mut result = String::new();
+    let mut last_end = 0;
+
+    // Collect all matches and their positions
+    let matches: Vec<_> = re.captures_iter(text).collect();
+
+    for caps in matches {
+        let m = caps.get(0).unwrap(); // The full match (e.g., ${VAR_NAME})
+        let var_name = &caps[1]; // The captured variable name
+
+        // Append the text before the current match
+        result.push_str(&text[last_end..m.start()]);
+
+        // Asynchronously get the environment variable's value
+        let value = get(var_name).await;
+
+        // Append the retrieved value (or a default if None)
+        result.push_str(&value);
+
+        last_end = m.end();
+    }
+
+    // Append any remaining text after the last match
+    result.push_str(&text[last_end..]);
+
+    result
 }

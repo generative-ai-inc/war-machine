@@ -1,7 +1,10 @@
 use tokio::process::Command;
 
 use crate::{
-    library::{system::command, utils::logging},
+    library::{
+        system::command,
+        utils::{env_vars, logging},
+    },
     models::{config::Config, machine_state::MachineState},
 };
 
@@ -48,7 +51,11 @@ pub async fn run(
         let command = format!("{} {}", command, command_args);
         logging::nl().await;
         logging::print_color(logging::BG_GREEN, " Starting service ").await;
-        logging::info(&format!("Running: {}", command)).await;
+        logging::info(&format!(
+            "Running: {}",
+            env_vars::replace_env_vars(&command).await
+        ))
+        .await;
         let child = Command::new("sh")
             .arg("-c")
             .arg(&command)
