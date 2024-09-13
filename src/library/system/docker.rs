@@ -199,7 +199,7 @@ pub async fn start_service(
 
     if clean_mode {
         let remove_containers_result =
-            remove_containers(&format!("name={}-{}*", config.machine_name, name)).await;
+            remove_containers(&format!("name=^{}-{}$", config.machine_name, name)).await;
 
         match remove_containers_result {
             Ok(_) => {
@@ -223,7 +223,7 @@ pub async fn start_service(
             .arg("ps")
             .arg("-a")
             .arg("--filter")
-            .arg(&format!("name={}", name))
+            .arg(&format!("name=^{}-{}$", config.machine_name, name))
             .output()
             .await;
 
