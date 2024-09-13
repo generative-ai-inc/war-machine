@@ -1,5 +1,10 @@
 #![allow(unused)]
+use std::env;
+
+use regex::Regex;
 use tokio::io::{self, stdout, AsyncWriteExt};
+
+use super::env_vars;
 
 // ANSI color codes
 pub const BLACK: &str = "\x1b[0;30m";
