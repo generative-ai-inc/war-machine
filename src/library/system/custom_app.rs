@@ -50,6 +50,35 @@ pub async fn check_installation(
     }
 }
 
+pub async fn clean_service(
+    machine_state: &MachineState,
+    config: &Config,
+    name: &str,
+    source: &AppSource,
+    fail_fast: bool,
+) {
+    let clean_command = if let Some(clean_command) = &source.clean_command {
+        Some(replace_placeholders(&machine_state, config, clean_command, name).await)
+    } else {
+        None
+    };
+
+    if let Some(clean_command) = clean_command.clone() {
+        let clean_results = command::spawn(&clean_command).await;
+
+        match clean_results {
+            Ok(_) => {}
+            Err(_) => {
+                logging::error(&format!("Failed to clean {}", name)).await;
+
+                if fail_fast {
+                    std::process::exit(1);
+                }
+            }
+        }
+    }
+}
+
 pub async fn start_service(
     machine_state: &MachineState,
     config: &Config,
@@ -68,29 +97,11 @@ pub async fn start_service(
         replace_placeholders(&machine_state, config, &source.start_command, name).await;
     let health_check_command =
         replace_placeholders(&machine_state, config, &source.health_check_command, name).await;
-    let clean_command = if let Some(clean_command) = &source.clean_command {
-        Some(replace_placeholders(&machine_state, config, clean_command, name).await)
-    } else {
-        None
-    };
 
     check_installation(&installation_check_command, &install_command, name).await;
 
     if clean_mode {
-        if let Some(clean_command) = clean_command.clone() {
-            let clean_results = command::spawn(&clean_command).await;
-
-            match clean_results {
-                Ok(_) => {}
-                Err(_) => {
-                    logging::error(&format!("Failed to clean {}", name)).await;
-
-                    if fail_fast {
-                        std::process::exit(1);
-                    }
-                }
-            }
-        }
+        clean_service(machine_state, config, name, source, fail_fast).await;
     } else {
         let health_check_results = command::run(&health_check_command).await;
 
