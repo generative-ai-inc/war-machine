@@ -15,7 +15,26 @@ pub async fn check_installation() {
         let url;
 
         if info.os_type() == os_info::Type::Macos {
-            url = "https://github.com/bitwarden/sdk/releases/download/bws-v0.5.0/bws-macos-universal-0.5.0.zip".to_string();
+            let arch = info.architecture();
+
+            match arch {
+                Some(arch) => {
+                    if arch == "arm64" {
+                        url = "https://github.com/bitwarden/sdk/releases/download/bws-v0.5.0/bws-aarch64-apple-darwin-0.5.0.zip".to_string();
+                    } else if arch == "x86_64" {
+                        url = "https://github.com/bitwarden/sdk/releases/download/bws-v0.5.0/bws-x86_64-apple-darwin-0.5.0.zip".to_string();
+                    } else {
+                        logging::error("Failed to install bitwarden cli: Unsupported architecture")
+                            .await;
+                        std::process::exit(1);
+                    }
+                }
+                None => {
+                    logging::error("Failed to install bitwarden cli: Failed to get architecture")
+                        .await;
+                    std::process::exit(1);
+                }
+            }
         } else {
             let arch = info.architecture();
 
