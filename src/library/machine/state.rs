@@ -12,7 +12,7 @@ use super::ports::produce_port_map;
 pub async fn get_machine_state() -> MachineState {
     let file_read_result = OpenOptions::new()
         .read(true)
-        .open(PathBuf::from(".warmachine/state.json"))
+        .open(PathBuf::from(".war_machine/state.json"))
         .await;
 
     let state = match file_read_result {
@@ -37,7 +37,7 @@ pub async fn save_machine_state(state: &MachineState) {
         .write(true)
         .create(true)
         .truncate(true)
-        .open(PathBuf::from(".warmachine/state.json"))
+        .open(PathBuf::from(".war_machine/state.json"))
         .await
         .unwrap();
 
@@ -45,11 +45,11 @@ pub async fn save_machine_state(state: &MachineState) {
     file.write_all(contents.as_bytes()).await.unwrap();
     file.flush().await.unwrap();
 }
-/// Checks if the .warmachine dir exists, if not it creates it
+/// Checks if the .war_machine dir exists, if not it creates it
 pub async fn check(config: &Config, clean_mode: bool) -> MachineState {
-    let warmachine_dir = std::env::current_dir().unwrap().join(".warmachine");
-    if !warmachine_dir.exists() {
-        std::fs::create_dir_all(warmachine_dir).unwrap();
+    let war_machine_dir = std::env::current_dir().unwrap().join(".war_machine");
+    if !war_machine_dir.exists() {
+        std::fs::create_dir_all(war_machine_dir).unwrap();
     }
 
     let mut machine_state = get_machine_state().await;
