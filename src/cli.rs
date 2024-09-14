@@ -67,6 +67,29 @@ pub fn build() -> Command {
             .last(true)
         )
     )
+    .subcommand(Command::new("clean")
+        .about("Clean the docker environment")
+        .arg(
+            arg!([service] "Service to clean")
+            .required(false)
+            .value_parser(value_parser!(String))
+            .value_hint(ValueHint::Other),
+        )
+        .arg(
+            arg!(
+                -c --config <FILE> "Configuration file to use."
+            )
+            .default_value(*CONFIG_PATH_STR)
+            .required(false)
+            .value_parser(value_parser!(PathBuf))
+            .value_hint(ValueHint::AnyPath),
+        )
+        .arg(
+            arg!(-a --all "Clean all services")
+            .required(false)
+            .action(ArgAction::SetTrue)
+        )
+    )
     .subcommand(Command::new("secret")
         .about("Add or remove a secret")
         .subcommand_required(true)

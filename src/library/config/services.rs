@@ -8,6 +8,34 @@ use crate::library::utils::env_vars;
 use crate::models::config::{Config, Service, Source};
 use crate::models::machine_state::MachineState;
 
+pub async fn clean(
+    machine_state: &MachineState,
+    config: &Config,
+    service: &Service,
+    fail_fast: bool,
+) {
+    match &service.source {
+        Source::CONTAINER(_) => {
+            docker::clean_service(config, &service.name, fail_fast).await;
+        }
+        Source::APP(app_source) => {
+            custom_app::clean_service(machine_state, config, &service.name, app_source, fail_fast)
+                .await;
+        }
+    }
+
+    // Set the available_before_start=false variables
+    let exposed_values =
+        get_exposed_variables(&machine_state, &service.exposed_values, false).await;
+
+    let mut env_vars = vec![];
+    for (key, value) in exposed_values {
+        env_vars.push((key, value, "war machine".to_string()));
+    }
+
+    env_vars::set(&env_vars).await;
+}
+
 pub async fn start(
     machine_state: &MachineState,
     config: &Config,

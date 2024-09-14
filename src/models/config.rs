@@ -16,7 +16,7 @@ fn default_registry() -> String {
     "docker.io".to_string()
 }
 
-#[derive(Deserialize, Serialize, Debug, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
 pub struct ContainerSource {
     pub image: String,
     pub tag: String,
@@ -27,7 +27,7 @@ pub struct ContainerSource {
     pub registry: String,
 }
 
-#[derive(Deserialize, Serialize, Debug, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
 pub struct AppSource {
     pub install_command: String,
     pub install_check_command: String,
@@ -37,7 +37,7 @@ pub struct AppSource {
     pub clean_command: Option<String>,
 }
 
-#[derive(Deserialize, Serialize, Debug, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
 #[serde(untagged)]
 pub enum Source {
     CONTAINER(ContainerSource),
@@ -68,7 +68,7 @@ fn default_rename() -> HashMap<String, String> {
     HashMap::new()
 }
 
-#[derive(Deserialize, Serialize, Debug, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
 pub struct ExposedValueCommand {
     pub command: String,
     pub description: Option<String>,
@@ -80,7 +80,7 @@ pub struct ExposedValueCommand {
     pub rename: HashMap<String, String>,
 }
 
-#[derive(Deserialize, Serialize, Debug, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
 pub struct ExposedValueLiteral {
     pub name: String,
     pub value: String,
@@ -89,7 +89,7 @@ pub struct ExposedValueLiteral {
     pub available_before_start: bool,
 }
 
-#[derive(Deserialize, Serialize, Debug, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
 #[serde(rename_all = "lowercase", untagged)]
 pub enum ExposedValueType {
     COMMAND(ExposedValueCommand),
@@ -104,7 +104,7 @@ fn default_depends_on() -> Vec<String> {
     vec![]
 }
 
-#[derive(Deserialize, Serialize, Debug, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
 pub struct Service {
     pub name: String,
 

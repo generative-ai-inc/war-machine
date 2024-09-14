@@ -132,8 +132,6 @@ pub async fn start_container(name: &str, source: &ContainerSource) -> Result<(),
 }
 
 pub async fn remove_containers(filter: &str) -> Result<(), Box<dyn Error>> {
-    logging::info("Cleaning up docker containers").await;
-
     let containers_to_remove_vec = Command::new("docker")
         .args(&["ps", "-a", "--filter", filter, "-q"])
         .output()
@@ -183,6 +181,28 @@ pub async fn replace_placeholders(
     new_command
 }
 
+pub async fn clean_service(config: &Config, name: &str, fail_fast: bool) {
+    let remove_containers_result =
+        remove_containers(&format!("name=^{}-{}$", config.machine_name, name)).await;
+
+    match remove_containers_result {
+        Ok(_) => {
+            logging::info(&format!("⚠️  {} docker container removed", name)).await;
+        }
+        Err(e) => {
+            logging::error(&format!(
+                "Failed to remove {} docker containers: {}",
+                name, e
+            ))
+            .await;
+
+            if fail_fast {
+                std::process::exit(1);
+            }
+        }
+    }
+}
+
 pub async fn start_service(
     machine_state: &MachineState,
     config: &Config,
@@ -198,30 +218,11 @@ pub async fn start_service(
     };
 
     if clean_mode {
-        let remove_containers_result =
-            remove_containers(&format!("name=^{}-{}$", config.machine_name, name)).await;
-
-        match remove_containers_result {
-            Ok(_) => {
-                logging::info(&format!("⚠️ {} docker containers removed", name)).await;
-            }
-            Err(e) => {
-                logging::error(&format!(
-                    "Failed to remove {} docker containers: {}",
-                    name, e
-                ))
-                .await;
-
-                if fail_fast {
-                    std::process::exit(1);
-                }
-            }
-        }
+        clean_service(config, name, fail_fast).await;
     } else {
         // Check if redis is already running
         let check_results = Command::new("docker")
             .arg("ps")
-            .arg("-a")
             .arg("--filter")
             .arg(&format!("name=^{}-{}$", config.machine_name, name))
             .output()
