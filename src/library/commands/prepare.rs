@@ -165,7 +165,7 @@ pub async fn prepare(
         }
 
         logging::nl().await;
-        logging::print_color(logging::BG_YELLOW, " Starting local instances ").await;
+        logging::info("Starting local services").await;
 
         services::start_all(machine_state, config, clean_mode, true).await;
 
@@ -178,6 +178,8 @@ pub async fn prepare(
                 std::process::exit(1);
             }
         }
+
+        logging::info("Local services started").await;
     }
 
     env_vars::set(&env_vars).await;

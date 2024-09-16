@@ -8,6 +8,11 @@ pub async fn print_variables_box(
     original_env_vars: HashMap<String, String>,
     env_vars: &Vec<(String, String, String)>,
 ) {
+    // If there are no environment variables, don't print anything
+    if env_vars.is_empty() {
+        return;
+    }
+
     logging::nl().await;
     logging::print_color(logging::BG_BLUE, " Environment variables ").await;
 

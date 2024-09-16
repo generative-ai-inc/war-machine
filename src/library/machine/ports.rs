@@ -101,6 +101,11 @@ pub async fn get_ports(length: usize) -> Vec<i32> {
 }
 
 pub async fn print_port_map_box(machine_state: &MachineState) {
+    // If there are no ports, don't print anything
+    if machine_state.ports.is_empty() {
+        return;
+    }
+
     logging::nl().await;
     logging::print_color(logging::BG_MAGENTA, " Port map ").await;
 
