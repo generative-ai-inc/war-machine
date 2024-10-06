@@ -9,10 +9,10 @@ use crate::{
 pub async fn check(config: &Config) {
     for requirement in &config.requirements {
         match requirement {
-            Requirement::BREW => {
+            Requirement::Brew => {
                 brew::check_installation().await;
             }
-            Requirement::DOCKER => {
+            Requirement::Docker => {
                 docker::check_installation().await;
 
                 // Create docker networks
@@ -28,13 +28,13 @@ pub async fn check(config: &Config) {
                     }
                 }
             }
-            Requirement::PIPX => {
+            Requirement::Pipx => {
                 pipx::check_installation().await;
             }
-            Requirement::PYTHON => {
+            Requirement::Python => {
                 python::check_installation().await;
             }
-            Requirement::POETRY => {
+            Requirement::Poetry => {
                 poetry::check_installation().await;
             }
         }

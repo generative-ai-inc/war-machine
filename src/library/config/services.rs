@@ -15,10 +15,10 @@ pub async fn clean(
     fail_fast: bool,
 ) {
     match &service.source {
-        Source::CONTAINER(_) => {
+        Source::Container(_) => {
             docker::clean_service(config, &service.name, fail_fast).await;
         }
-        Source::APP(app_source) => {
+        Source::App(app_source) => {
             custom_app::clean_service(machine_state, config, &service.name, app_source, fail_fast)
                 .await;
         }
@@ -44,7 +44,7 @@ pub async fn start(
     fail_fast: bool,
 ) {
     match &service.source {
-        Source::CONTAINER(container_source) => {
+        Source::Container(container_source) => {
             docker::start_service(
                 machine_state,
                 config,
@@ -55,7 +55,7 @@ pub async fn start(
             )
             .await;
         }
-        Source::APP(app_source) => {
+        Source::App(app_source) => {
             custom_app::start_service(
                 machine_state,
                 config,
