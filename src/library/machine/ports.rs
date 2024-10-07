@@ -36,7 +36,7 @@ async fn get_ports_needed(config: &Config) -> Vec<String> {
     let mut ports_needed: Vec<String> = vec![];
     for service in &config.services {
         match &service.source {
-            Source::CONTAINER(docker_service) => {
+            Source::Container(docker_service) => {
                 if let Some(start_command) = &docker_service.start_command {
                     let ports = get_ports_needed_from_str(&start_command);
                     ports_needed.extend(ports);
@@ -47,7 +47,7 @@ async fn get_ports_needed(config: &Config) -> Vec<String> {
                     ports_needed.extend(ports);
                 }
             }
-            Source::APP(app_service) => {
+            Source::App(app_service) => {
                 let install_ports = get_ports_needed_from_str(&app_service.install_command);
                 ports_needed.extend(install_ports);
 

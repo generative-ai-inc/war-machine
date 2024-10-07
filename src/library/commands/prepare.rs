@@ -20,12 +20,12 @@ async fn prepare_features(
 ) {
     for feature in &config.features {
         match feature {
-            Feature::PYTHONPATH(pythonpath_feature) => {
+            Feature::PythonPath(pythonpath_feature) => {
                 let env_file_path = PathBuf::from(&pythonpath_feature.env_file_path);
                 let pythonpath_value = PathBuf::from(&pythonpath_feature.pythonpath_value);
                 pythonpath::check(&env_file_path, &pythonpath_value).await;
             }
-            Feature::BITWARDEN => {
+            Feature::Bitwarden => {
                 let bw_env_vars = bitwarden::get_env_variables(secrets).await;
 
                 for (key, value) in bw_env_vars {
@@ -45,7 +45,7 @@ pub async fn get_exposed_variables(
 
     for exposed_value in exposed_values {
         match exposed_value {
-            ExposedValueType::LITERAL(exposed_value) => {
+            ExposedValueType::Literal(exposed_value) => {
                 if available_before_start == exposed_value.available_before_start {
                     env_vars_to_return.push((
                         exposed_value.name.trim().to_uppercase(),
@@ -54,7 +54,7 @@ pub async fn get_exposed_variables(
                     ));
                 }
             }
-            ExposedValueType::COMMAND(exposed_value) => {
+            ExposedValueType::Command(exposed_value) => {
                 if available_before_start == exposed_value.available_before_start {
                     let command_result = command::run(&exposed_value.command).await.unwrap();
 

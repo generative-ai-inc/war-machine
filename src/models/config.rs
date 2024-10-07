@@ -5,11 +5,11 @@ use serde::{Deserialize, Serialize};
 #[derive(Deserialize, Serialize, Debug, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum Requirement {
-    BREW,
-    DOCKER,
-    PYTHON,
-    PIPX,
-    POETRY,
+    Brew,
+    Docker,
+    Python,
+    Pipx,
+    Poetry,
 }
 
 fn default_registry() -> String {
@@ -40,8 +40,8 @@ pub struct AppSource {
 #[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
 #[serde(untagged)]
 pub enum Source {
-    CONTAINER(ContainerSource),
-    APP(AppSource),
+    Container(ContainerSource),
+    App(AppSource),
 }
 
 #[derive(Deserialize, Serialize, Debug, PartialEq)]
@@ -53,8 +53,8 @@ pub struct PythonpathFeature {
 #[derive(Deserialize, Serialize, Debug, PartialEq)]
 #[serde(rename_all = "lowercase", tag = "name")]
 pub enum Feature {
-    PYTHONPATH(PythonpathFeature),
-    BITWARDEN,
+    PythonPath(PythonpathFeature),
+    Bitwarden,
 }
 
 fn default_available_before_start() -> bool {
@@ -92,8 +92,8 @@ pub struct ExposedValueLiteral {
 #[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
 #[serde(rename_all = "lowercase", untagged)]
 pub enum ExposedValueType {
-    COMMAND(ExposedValueCommand),
-    LITERAL(ExposedValueLiteral),
+    Command(ExposedValueCommand),
+    Literal(ExposedValueLiteral),
 }
 
 fn default_exposed_values() -> Vec<ExposedValueType> {
