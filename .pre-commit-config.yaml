@@ -5,7 +5,7 @@ default_language_version:
 default_install_hook_types: [pre-commit, post-checkout, post-merge]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: check-added-large-files
         exclude: ^templates/
