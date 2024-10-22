@@ -32,7 +32,7 @@
   rpassword = "7.3.1"
   serde = "1.0.210"
   serde_json = { version = "1.0.132", features = ["std"] }
-  tokio = { version = "1.40.0", features = [
+  tokio = { version = "1.41.0", features = [
     "macros",
     "signal",
     "fs",
